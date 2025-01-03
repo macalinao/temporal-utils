@@ -1,5 +1,11 @@
 # temporal-zod
 
+## 0.0.5
+
+### Patch Changes
+
+- 8e557ba: Add tests
+
 ## 0.0.4
 
 ### Patch Changes
