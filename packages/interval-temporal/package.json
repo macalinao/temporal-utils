@@ -2,7 +2,7 @@
   "name": "interval-temporal",
   "description": "An interval type for Temporal. Also contains helpers for comparing and sorting Temporal objects.",
   "author": "Ian Macalinao <me@ianm.com>",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "license": "Apache-2.0",
   "type": "module",
   "sideEffects": false,
