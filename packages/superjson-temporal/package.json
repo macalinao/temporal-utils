@@ -2,7 +2,7 @@
   "name": "superjson-temporal",
   "description": "SuperJSON serializers/deserializers for Temporal types.",
   "author": "Ian Macalinao <me@ianm.com>",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "license": "Apache-2.0",
   "type": "module",
   "sideEffects": false,
