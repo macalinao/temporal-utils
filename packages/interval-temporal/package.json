@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@macalinao/eslint-config": "^4.0.1",
-    "@macalinao/tsconfig": "^3.0.0",
+    "@macalinao/tsconfig": "^3.0.1",
     "eslint": "^9.17.0",
     "temporal-polyfill": "^0.2.5",
     "typescript": "^5.7.2",
