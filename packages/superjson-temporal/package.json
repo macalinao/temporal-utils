@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "@macalinao/eslint-config": "^4.0.1",
-    "@macalinao/tsconfig": "^3.0.0",
+    "@macalinao/tsconfig": "^3.1.0",
     "eslint": "^9.17.0",
     "superjson": "^2.2.2",
     "temporal-polyfill": "^0.2.5",
