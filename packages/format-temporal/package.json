@@ -30,7 +30,7 @@
     "temporal-polyfill": "^0.2.5",
     "temporal-spec": "^0.2.4",
     "typescript": "^5.7.3",
-    "vitest": "^3.0.3"
+    "vitest": "^3.0.4"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
