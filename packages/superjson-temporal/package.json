@@ -30,7 +30,7 @@
   "devDependencies": {
     "@macalinao/eslint-config": "^4.1.6",
     "@macalinao/tsconfig": "^3.1.0",
-    "eslint": "^9.20.1",
+    "eslint": "^9.23.0",
     "superjson": "^2.2.2",
     "temporal-polyfill": "^0.2.5",
     "typescript": "^5.7.3",
