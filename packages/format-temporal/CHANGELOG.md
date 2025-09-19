@@ -1,5 +1,11 @@
 # format-temporal
 
+## 0.4.0
+
+### Minor Changes
+
+- 9195fc9: Upgrade to Zod v4
+
 ## 0.3.1
 
 ### Patch Changes
