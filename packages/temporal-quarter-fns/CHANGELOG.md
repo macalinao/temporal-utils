@@ -1,5 +1,11 @@
 # temporal-quarter-fns
 
+## 0.3.0
+
+### Minor Changes
+
+- 9195fc9: Upgrade to Zod v4
+
 ## 0.2.1
 
 ### Patch Changes
