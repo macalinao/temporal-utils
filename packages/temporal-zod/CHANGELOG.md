@@ -1,5 +1,11 @@
 # temporal-zod
 
+## 0.5.0
+
+### Minor Changes
+
+- ad66ee5: Fix types for temporal-zod
+
 ## 0.4.0
 
 ### Minor Changes
