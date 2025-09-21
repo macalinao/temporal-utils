@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as z from "zod";
 
 // eslint-disable-next-line @typescript-eslint/no-extraneous-class, @typescript-eslint/no-unused-vars, unused-imports/no-unused-vars
 declare abstract class Class {
@@ -12,7 +12,10 @@ export type ZodTemporal<
   TClass extends typeof Class & {
     from: (arg: string) => InstanceType<TClass>;
   },
-> = z.ZodType<InstanceType<TClass>>;
+> = z.ZodType<
+  InstanceType<TClass>, 
+  InstanceType<TClass> | string
+>;
 
 /**
  * Creates Zod validators for a Temporal class.

@@ -24,7 +24,7 @@ Strings are coerced to the appropriate Temporal type, and for the `Instant` type
 ### Example
 
 ```typescript
-import { z } from "zod";
+import * as z from "zod";
 import { zZonedDateTime } from "temporal-zod";
 
 const schema = z.object({

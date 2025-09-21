@@ -1,6 +1,6 @@
 import { Temporal } from "temporal-polyfill";
 import { describe, expect, it } from "vitest";
-import { z } from "zod";
+import * as z from "zod";
 
 import { zDuration } from "./duration.js";
 import { zInstant } from "./instant.js";
