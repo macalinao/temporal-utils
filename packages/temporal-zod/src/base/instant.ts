@@ -10,7 +10,10 @@ const validators = temporalValidators(Instant);
 /**
  * Validates or coerces a string or Date to a {@link Temporal.Instant}.
  */
-export const zInstant = z.union([
+export const zInstant:  z.ZodType<
+  Temporal.Instant,
+  Temporal.Instant | string | Date
+> = z.union([
   validators.coerce,
   z
     .date()
