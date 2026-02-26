@@ -1,6 +1,6 @@
 export const parseYearLike = (yearLike: string): number => {
-  const num = parseInt(yearLike);
-  if (isNaN(num)) {
+  const num = Number.parseInt(yearLike, 10);
+  if (Number.isNaN(num)) {
     throw new Error(`Invalid year: ${yearLike}`);
   }
   if (yearLike.length === 2) {

@@ -32,11 +32,11 @@ export const TEMPORAL_COMPARATORS: {
     TemporalComparableWithStringTag<TTag>
   >;
 } = {
-  ["Temporal.PlainDate"]: (a, b) => Temporal.PlainDate.compare(a, b),
-  ["Temporal.Instant"]: (a, b) => Temporal.Instant.compare(a, b),
-  ["Temporal.PlainDateTime"]: (a, b) => Temporal.PlainDateTime.compare(a, b),
-  ["Temporal.ZonedDateTime"]: (a, b) => Temporal.ZonedDateTime.compare(a, b),
-  ["Temporal.PlainTime"]: (a, b) => Temporal.PlainTime.compare(a, b),
+  "Temporal.PlainDate": (a, b) => Temporal.PlainDate.compare(a, b),
+  "Temporal.Instant": (a, b) => Temporal.Instant.compare(a, b),
+  "Temporal.PlainDateTime": (a, b) => Temporal.PlainDateTime.compare(a, b),
+  "Temporal.ZonedDateTime": (a, b) => Temporal.ZonedDateTime.compare(a, b),
+  "Temporal.PlainTime": (a, b) => Temporal.PlainTime.compare(a, b),
 };
 
 export const compareTemporals = <T extends TemporalComparable>(

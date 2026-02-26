@@ -1,6 +1,5 @@
+import { describe, expect, test } from "bun:test";
 import { Temporal } from "temporal-polyfill";
-import { describe, expect, it } from "vitest";
-
 import { areIntervalsOverlapping } from "./areIntervalsOverlapping.js";
 
 describe("areIntervalsOverlapping", () => {
@@ -13,7 +12,7 @@ describe("areIntervalsOverlapping", () => {
     end: Temporal.ZonedDateTime.from("2023-10-02T12:00:00Z[UTC]"),
   };
 
-  it("should return true when the intervals overlap", () => {
+  test("should return true when the intervals overlap", () => {
     expect(areIntervalsOverlapping(base, overlaps)).toBe(true);
   });
 });

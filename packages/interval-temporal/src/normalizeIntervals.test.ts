@@ -1,7 +1,6 @@
-import { Temporal } from "temporal-polyfill";
-import { describe, expect, it } from "vitest";
-
 import type { Interval } from "./interval.js";
+import { describe, expect, test } from "bun:test";
+import { Temporal } from "temporal-polyfill";
 import { normalizeIntervals } from "./normalizeIntervals.js";
 
 const toPlainTimeIntervals = (
@@ -13,12 +12,12 @@ const toPlainTimeIntervals = (
   }));
 
 describe("normalizeIntervals", () => {
-  it("should return an empty array when given an empty array", () => {
+  test("should return an empty array when given an empty array", () => {
     const result = normalizeIntervals([]);
     expect(result).toEqual([]);
   });
 
-  it("should return the same range when given a single range", () => {
+  test("should return the same range when given a single range", () => {
     const input: Interval<Temporal.PlainTime>[] = toPlainTimeIntervals([
       { start: "09:00", end: "17:00" },
     ]);
@@ -26,7 +25,7 @@ describe("normalizeIntervals", () => {
     expect(result).toEqual(input);
   });
 
-  it("should combine overlapping ranges", () => {
+  test("should combine overlapping ranges", () => {
     const input = toPlainTimeIntervals([
       { start: "09:00", end: "12:00" },
       { start: "11:00", end: "14:00" },
@@ -37,7 +36,7 @@ describe("normalizeIntervals", () => {
     expect(result).toEqual(expected);
   });
 
-  it("should not combine non-overlapping ranges", () => {
+  test("should not combine non-overlapping ranges", () => {
     const input = toPlainTimeIntervals([
       { start: "09:00", end: "11:00" },
       { start: "13:00", end: "15:00" },
@@ -52,7 +51,7 @@ describe("normalizeIntervals", () => {
     expect(result).toEqual(expected);
   });
 
-  it("should sort ranges by start time", () => {
+  test("should sort ranges by start time", () => {
     const input = toPlainTimeIntervals([
       { start: "13:00", end: "15:00" },
       { start: "09:00", end: "11:00" },
@@ -67,7 +66,7 @@ describe("normalizeIntervals", () => {
     expect(result).toEqual(expected);
   });
 
-  it("should handle adjacent ranges", () => {
+  test("should handle adjacent ranges", () => {
     const input = toPlainTimeIntervals([
       { start: "09:00", end: "11:00" },
       { start: "11:00", end: "13:00" },
@@ -78,7 +77,7 @@ describe("normalizeIntervals", () => {
     expect(result).toEqual(expected);
   });
 
-  it("works with contained ranges", () => {
+  test("works with contained ranges", () => {
     const input = toPlainTimeIntervals([
       { start: "09:00", end: "17:00" },
       { start: "12:00", end: "14:00" }, // Overlapping range

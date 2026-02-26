@@ -15,26 +15,22 @@ jobs:
   version:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: actions/checkout@v6
+      - name: Cache turbo build setup
+        uses: actions/cache@v5
         with:
-          run_install: false
-      - name: setup node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22.x
-          cache: pnpm
-      - name: Install dependencies
-        run: pnpm install
-      - name: Build
-        run: pnpm build
-      - name: Lint
-        run: pnpm lint
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - run: bun run lint
 
       # GitHub pages documentation
       - name: TypeDoc
-        run: pnpm typedoc
+        run: bun run typedoc
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact

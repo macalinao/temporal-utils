@@ -1,11 +1,10 @@
+import { describe, expect, test } from "bun:test";
 import { default as SuperJSON } from "superjson";
 import { Temporal } from "temporal-polyfill";
-import { describe, expect, it } from "vitest";
-
 import { registerSuperJSONTemporal } from "./registerSuperJSONTemporal.js";
 
 describe("registerSuperJSONTemporal", () => {
-  it("should register the serializers/deserializers for Temporal types", () => {
+  test("should register the serializers/deserializers for Temporal types", () => {
     registerSuperJSONTemporal(SuperJSON);
 
     const zonedDateTime = Temporal.ZonedDateTime.from(

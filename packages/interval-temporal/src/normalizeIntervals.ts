@@ -1,6 +1,6 @@
 import type { TemporalComparable } from "./comparators.js";
-import { compareTemporals } from "./comparators.js";
 import type { Interval } from "./interval.js";
+import { compareTemporals } from "./comparators.js";
 
 /**
  * Normalizes the ranges by combining overlapping ranges and sorting them.
