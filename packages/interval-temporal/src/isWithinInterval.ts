@@ -1,6 +1,6 @@
 import type { TemporalComparable } from "./comparators.js";
-import { compareTemporals, sortedTuple } from "./comparators.js";
 import type { Interval } from "./interval.js";
+import { compareTemporals, sortedTuple } from "./comparators.js";
 
 export function isWithinInterval<T extends TemporalComparable>(
   value: T,

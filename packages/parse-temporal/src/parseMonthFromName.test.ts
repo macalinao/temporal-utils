@@ -1,9 +1,8 @@
-import { describe, expect, it } from "vitest";
-
+import { describe, expect, test } from "bun:test";
 import { parseMonthFromName } from "./parseMonthFromName.js";
 
 describe("parseMonthFromName", () => {
-  it("should return the correct month number for valid month names", () => {
+  test("should return the correct month number for valid month names", () => {
     expect(parseMonthFromName("January")).toBe(1);
     expect(parseMonthFromName("February")).toBe(2);
     expect(parseMonthFromName("March")).toBe(3);

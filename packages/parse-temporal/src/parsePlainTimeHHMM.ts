@@ -15,8 +15,8 @@ export const parsePlainTimeHHMM = (time: string): Temporal.PlainTime => {
   const [hours, minutes] = [paddedTime.slice(0, 2), paddedTime.slice(2, 4)];
   return Temporal.PlainTime.from(
     {
-      hour: parseInt(hours),
-      minute: parseInt(minutes),
+      hour: Number.parseInt(hours, 10),
+      minute: Number.parseInt(minutes, 10),
     },
     { overflow: "reject" },
   );

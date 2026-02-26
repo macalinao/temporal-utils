@@ -1,8 +1,8 @@
 import { parseMonthFromName } from "./parseMonthFromName.js";
 
 export const parseMonthLike = (monthLike: string): number => {
-  const month = parseMonthFromName(monthLike) ?? parseInt(monthLike);
-  if (isNaN(month)) {
+  const month = parseMonthFromName(monthLike) ?? Number.parseInt(monthLike, 10);
+  if (Number.isNaN(month)) {
     throw new Error(`Invalid month: ${monthLike}`);
   }
   return month;

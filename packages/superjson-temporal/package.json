@@ -28,13 +28,13 @@
     "temporal-polyfill": "^0.2 || ^0.3"
   },
   "devDependencies": {
-    "@macalinao/eslint-config": "^4.1.10",
-    "@macalinao/tsconfig": "^3.1.0",
+    "@macalinao/eslint-config": "^7.0.3",
+    "@macalinao/tsconfig": "^3.2.5",
+    "@types/bun": "latest",
     "eslint": "^9.23.0",
     "superjson": "^2.2.2",
     "temporal-polyfill": "^0.3.0",
-    "typescript": "^5.8.2",
-    "vitest": "^3.1.1"
+    "typescript": "^5.8.2"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -48,14 +48,10 @@
     "build": "tsc",
     "clean": "tsc --build --clean && rm -fr dist/",
     "lint": "eslint .",
-    "test": "vitest"
+    "test": "bun test src/"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
     "access": "public"
-  },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx}": "eslint --fix",
-    "*.{md,json}": "prettier --write"
   }
 }
