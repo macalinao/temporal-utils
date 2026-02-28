@@ -5,7 +5,22 @@ import { temporalValidators } from "./temporalValidator.js";
 
 export const PlainTime: typeof Temporal.PlainTime = Temporal.PlainTime;
 
-const validators = temporalValidators(PlainTime);
+/**
+ * Regex pattern for {@link Temporal.PlainTime} ISO 8601 strings
+ * (e.g. `13:45:30` or `13:45:30.123456789`).
+ * Validates hours (00–23), minutes (00–59), seconds (00–59), and up to 9 fractional digits.
+ * Note: Unlike RFC 3339 "full-time", PlainTime has no timezone offset.
+ */
+export const PLAIN_TIME_PATTERN =
+  "^([01]\\d|2[0-3]):[0-5]\\d(:[0-5]\\d(\\.\\d{1,9})?)?$";
+
+const validators = temporalValidators(PlainTime, {
+  type: "string",
+  id: "PlainTime",
+  description:
+    "An ISO 8601 time string without date or timezone (e.g. 13:45:30)",
+  format: "time",
+});
 
 /**
  * Validates or coerces a string to a {@link Temporal.PlainTime}.

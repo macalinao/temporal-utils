@@ -27,6 +27,7 @@
     "@macalinao/eslint-config": "^7.0.3",
     "@macalinao/tsconfig": "^3.2.5",
     "@types/bun": "latest",
+    "ajv": "^8.18.0",
     "eslint": "^9.35.0",
     "temporal-polyfill": "^0.3.0",
     "typescript": "^5.9.2",

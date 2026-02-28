@@ -1,4 +1,4 @@
-export type { ZodTemporal } from "./temporalValidator.js";
+export type { TemporalJSONSchema, ZodTemporal } from "./temporalValidator.js";
 export * from "./duration.js";
 export * from "./instant.js";
 export * from "./plainDate.js";
