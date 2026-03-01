@@ -1,9 +1,18 @@
 import type { z } from "zod";
-import type { ZodTemporal } from "./temporalValidator.js";
+import type { ZodTemporal } from "./temporal-validator.js";
 import { Temporal } from "temporal-polyfill";
-import { temporalValidators } from "./temporalValidator.js";
+import { temporalValidators } from "./temporal-validator.js";
 
 export const Duration: typeof Temporal.Duration = Temporal.Duration;
+
+/**
+ * Regex pattern for {@link Temporal.Duration} ISO 8601 duration strings
+ * (e.g. `PT1H30M`, `P1Y2M3DT4H5M6.5S`).
+ * Supports years, months, weeks, days, hours, minutes, and decimal seconds.
+ * A leading `-` is allowed for negative durations.
+ */
+export const DURATION_PATTERN =
+  "^-?P(\\d+Y)?(\\d+M)?(\\d+W)?(\\d+D)?(T(\\d+H)?(\\d+M)?((\\d+(\\.\\d+)?)S)?)?$";
 
 const validators = temporalValidators(Duration);
 

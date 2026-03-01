@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { default as SuperJSON } from "superjson";
 import { Temporal } from "temporal-polyfill";
-import { registerSuperJSONTemporal } from "./registerSuperJSONTemporal.js";
+import { registerSuperJSONTemporal } from "./register-super-json-temporal.js";
 
 describe("registerSuperJSONTemporal", () => {
   test("should register the serializers/deserializers for Temporal types", () => {

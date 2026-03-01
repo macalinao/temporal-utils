@@ -1,1 +1,1 @@
-export * from "./base/index.js";
+export * from "./json-schemas.js";

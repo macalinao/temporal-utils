@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { parseMonthFromName } from "./parseMonthFromName.js";
+import { parseMonthFromName } from "./parse-month-from-name.js";
 
 describe("parseMonthFromName", () => {
   test("should return the correct month number for valid month names", () => {
