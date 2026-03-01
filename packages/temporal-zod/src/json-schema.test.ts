@@ -1,6 +1,12 @@
+import type { ValidateFunction } from "ajv/dist/2020.js";
+import type { FormatsPlugin } from "ajv-formats";
 import { describe, expect, test } from "bun:test";
-import Ajv2020, { type ValidateFunction } from "ajv/dist/2020";
-import addFormats from "ajv-formats";
+import { Ajv2020 } from "ajv/dist/2020.js";
+import * as _addFormats from "ajv-formats";
+
+// CJS/ESM interop: ajv-formats default export type is lost through namespace import
+const addFormats = _addFormats.default as unknown as FormatsPlugin;
+
 import { Temporal } from "temporal-polyfill";
 import * as z from "zod";
 import {
@@ -296,14 +302,14 @@ describe("full JSON Schema snapshot for all types", () => {
       string,
       { $ref: string }
     >;
-    expect(props.instant.$ref).toBe("#/$defs/Temporal.Instant");
-    expect(props.plainDate.$ref).toBe("#/$defs/Temporal.PlainDate");
-    expect(props.plainTime.$ref).toBe("#/$defs/Temporal.PlainTime");
-    expect(props.plainDateTime.$ref).toBe("#/$defs/Temporal.PlainDateTime");
-    expect(props.plainYearMonth.$ref).toBe("#/$defs/Temporal.PlainYearMonth");
-    expect(props.plainMonthDay.$ref).toBe("#/$defs/Temporal.PlainMonthDay");
-    expect(props.zonedDateTime.$ref).toBe("#/$defs/Temporal.ZonedDateTime");
-    expect(props.duration.$ref).toBe("#/$defs/Temporal.Duration");
+    expect(props.instant?.$ref).toBe("#/$defs/Temporal.Instant");
+    expect(props.plainDate?.$ref).toBe("#/$defs/Temporal.PlainDate");
+    expect(props.plainTime?.$ref).toBe("#/$defs/Temporal.PlainTime");
+    expect(props.plainDateTime?.$ref).toBe("#/$defs/Temporal.PlainDateTime");
+    expect(props.plainYearMonth?.$ref).toBe("#/$defs/Temporal.PlainYearMonth");
+    expect(props.plainMonthDay?.$ref).toBe("#/$defs/Temporal.PlainMonthDay");
+    expect(props.zonedDateTime?.$ref).toBe("#/$defs/Temporal.ZonedDateTime");
+    expect(props.duration?.$ref).toBe("#/$defs/Temporal.Duration");
   });
 
   test("$defs contain complete metadata for every Temporal type", () => {
@@ -397,9 +403,9 @@ describe("full JSON Schema snapshot for all types", () => {
       string,
       Record<string, unknown>
     >;
-    expect(defs["Temporal.Instant"].format).toBe("date-time");
-    expect(defs["Temporal.PlainDate"].format).toBe("date");
-    expect(defs["Temporal.Duration"].format).toBe("duration");
+    expect(defs["Temporal.Instant"]?.format).toBe("date-time");
+    expect(defs["Temporal.PlainDate"]?.format).toBe("date");
+    expect(defs["Temporal.Duration"]?.format).toBe("duration");
   });
 });
 
