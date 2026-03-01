@@ -1,5 +1,11 @@
 # temporal-quarter-fns
 
+## 0.4.0
+
+### Minor Changes
+
+- 815c5ea: Support JSONSchema
+
 ## 0.3.0
 
 ### Minor Changes

@@ -1,5 +1,11 @@
 # interval-temporal
 
+## 0.5.0
+
+### Minor Changes
+
+- 815c5ea: Support JSONSchema
+
 ## 0.4.0
 
 ### Minor Changes
