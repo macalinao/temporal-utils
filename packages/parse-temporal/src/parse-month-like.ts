@@ -1,4 +1,4 @@
-import { parseMonthFromName } from "./parseMonthFromName.js";
+import { parseMonthFromName } from "./parse-month-from-name.js";
 
 export const parseMonthLike = (monthLike: string): number => {
   const month = parseMonthFromName(monthLike) ?? Number.parseInt(monthLike, 10);

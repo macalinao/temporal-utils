@@ -2,7 +2,7 @@
  * The {@link startOfQuarter} function options.
  */
 
-import type { TemporalWithYearMonth } from "./temporalWithYearMonth.js";
+import type { TemporalWithYearMonth } from "./temporal-with-year-month.js";
 
 /**
  * @name startOfQuarter

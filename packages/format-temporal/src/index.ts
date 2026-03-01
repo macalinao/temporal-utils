@@ -1,1 +1,1 @@
-export * from "./formatTemporal.js";
+export * from "./format-temporal.js";

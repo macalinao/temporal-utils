@@ -1,7 +1,6 @@
-import type { z } from "zod";
 import { Temporal } from "temporal-polyfill";
-import * as zod from "zod";
-import { temporalValidators } from "./temporalValidator.js";
+import * as z from "zod";
+import { temporalValidators } from "./temporal-validator.js";
 
 export const Instant: typeof Temporal.Instant = Temporal.Instant;
 
@@ -15,23 +14,13 @@ export const Instant: typeof Temporal.Instant = Temporal.Instant;
 export const INSTANT_PATTERN =
   "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d(:[0-5]\\d(\\.\\d{1,9})?)?(Z|[+-]([01]\\d|2[0-3]):[0-5]\\d)(\\[.+\\])?$";
 
-const validators = temporalValidators(
-  Instant,
-  {
-    type: "string",
-    id: "Instant",
-    description:
-      "An ISO 8601 instant string with a required UTC offset (e.g. 2023-01-15T13:45:30Z)",
-    format: "date-time",
-  },
-  [
-    zod
-      .date()
-      .transform((value) =>
-        Temporal.Instant.fromEpochMilliseconds(value.getTime()),
-      ),
-  ],
-);
+const validators = temporalValidators(Instant, [
+  z
+    .date()
+    .transform((value) =>
+      Temporal.Instant.fromEpochMilliseconds(value.getTime()),
+    ),
+]);
 
 /**
  * Validates or coerces a string or Date to a {@link Temporal.Instant}.

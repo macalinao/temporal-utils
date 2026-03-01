@@ -1,7 +1,7 @@
 import type { z } from "zod";
-import type { ZodTemporal } from "./temporalValidator.js";
+import type { ZodTemporal } from "./temporal-validator.js";
 import { Temporal } from "temporal-polyfill";
-import { temporalValidators } from "./temporalValidator.js";
+import { temporalValidators } from "./temporal-validator.js";
 
 export const ZonedDateTime: typeof Temporal.ZonedDateTime =
   Temporal.ZonedDateTime;
@@ -16,13 +16,7 @@ export const ZonedDateTime: typeof Temporal.ZonedDateTime =
 export const ZONED_DATE_TIME_PATTERN =
   "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d(:[0-5]\\d(\\.\\d{1,9})?)?(Z|[+-]([01]\\d|2[0-3]):[0-5]\\d)\\[.+\\]$";
 
-const validators = temporalValidators(ZonedDateTime, {
-  type: "string",
-  id: "ZonedDateTime",
-  description:
-    "An ISO 8601 date-time string with timezone offset and IANA annotation (e.g. 2023-01-15T13:45:30+08:00[Asia/Manila])",
-  pattern: ZONED_DATE_TIME_PATTERN,
-});
+const validators = temporalValidators(ZonedDateTime);
 
 /**
  * Validates or coerces a string to a {@link Temporal.ZonedDateTime}.

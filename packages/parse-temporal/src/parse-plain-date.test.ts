@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { Temporal } from "temporal-polyfill";
-import { parsePlainDate } from "./parsePlainDate.js";
+import { parsePlainDate } from "./parse-plain-date.js";
 
 describe("parsePlainDate", () => {
   test("should parse a date", () => {

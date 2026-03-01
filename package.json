@@ -13,6 +13,7 @@
     "lint:fix": "biome check --write --unsafe && turbo run lint -- --fix",
     "watch": "turbo watch build",
     "test": "bun test src/",
+    "test:cov": "bun test src/ --coverage",
     "typedoc": "typedoc",
     "ci:version": "changeset version && bun update",
     "ci:publish": "for dir in packages/*; do (cd \"$dir\" && bun publish || true); done && changeset tag"
@@ -23,8 +24,8 @@
   "devDependencies": {
     "@biomejs/biome": "^2.3.10",
     "@changesets/cli": "^2.29.8",
-    "@macalinao/biome-config": "^0.1.7",
-    "turbo": "^2.6.3",
+    "@macalinao/biome-config": "^0.2.0",
+    "turbo": "^2.8.12",
     "typedoc": "^0.28.1",
     "typescript": "^5.9.3"
   },

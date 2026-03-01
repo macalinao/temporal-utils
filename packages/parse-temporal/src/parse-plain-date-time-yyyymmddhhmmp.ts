@@ -1,5 +1,7 @@
 import { Temporal } from "temporal-polyfill";
-import { parsePlainDate } from "./parsePlainDate.js";
+import { parsePlainDate } from "./parse-plain-date.js";
+
+const WHITESPACE_RE = /\s+/;
 
 /**
  * Parses a date like 2025/01/04 12:50 PM
@@ -8,7 +10,7 @@ import { parsePlainDate } from "./parsePlainDate.js";
 export const parsePlainDateTimeYYYYMMDDHHMMp = (
   dateTime: string,
 ): Temporal.PlainDateTime => {
-  const [datePart, timePart, amOrPm] = dateTime.split(/\s+/);
+  const [datePart, timePart, amOrPm] = dateTime.split(WHITESPACE_RE);
   if (!(datePart && timePart && amOrPm)) {
     throw new Error("Invalid date of extraction");
   }

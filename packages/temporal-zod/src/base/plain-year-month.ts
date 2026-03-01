@@ -1,7 +1,7 @@
 import type { z } from "zod";
-import type { ZodTemporal } from "./temporalValidator.js";
+import type { ZodTemporal } from "./temporal-validator.js";
 import { Temporal } from "temporal-polyfill";
-import { temporalValidators } from "./temporalValidator.js";
+import { temporalValidators } from "./temporal-validator.js";
 
 export const PlainYearMonth: typeof Temporal.PlainYearMonth =
   Temporal.PlainYearMonth;
@@ -12,12 +12,7 @@ export const PlainYearMonth: typeof Temporal.PlainYearMonth =
  */
 export const PLAIN_YEAR_MONTH_PATTERN = "^\\d{4}-(0[1-9]|1[0-2])$";
 
-const validators = temporalValidators(PlainYearMonth, {
-  type: "string",
-  id: "PlainYearMonth",
-  description: "An ISO 8601 year-month string (e.g. 2023-01)",
-  pattern: PLAIN_YEAR_MONTH_PATTERN,
-});
+const validators = temporalValidators(PlainYearMonth);
 
 /**
  * Validates or coerces a string to a {@link Temporal.PlainYearMonth}.

@@ -2,12 +2,15 @@ import { describe, expect, test } from "bun:test";
 import { Temporal } from "temporal-polyfill";
 import * as z from "zod";
 import { zDuration } from "./duration.js";
-import { zInstant } from "./instant.js";
-import { zPlainDate, zPlainDateInstance } from "./plainDate.js";
-import { zPlainDateTime } from "./plainDateTime.js";
-import { zPlainMonthDay, zPlainMonthDayInstance } from "./plainMonthDay.js";
-import { zPlainYearMonth, zPlainYearMonthInstance } from "./plainYearMonth.js";
-import { zZonedDateTime } from "./zonedDateTime.js";
+import { zInstant, zInstantInstance } from "./instant.js";
+import { zPlainDate, zPlainDateInstance } from "./plain-date.js";
+import { zPlainDateTime } from "./plain-date-time.js";
+import { zPlainMonthDay, zPlainMonthDayInstance } from "./plain-month-day.js";
+import {
+  zPlainYearMonth,
+  zPlainYearMonthInstance,
+} from "./plain-year-month.js";
+import { zZonedDateTime } from "./zoned-date-time.js";
 
 describe("Temporal Zod Schemas", () => {
   test("should validate a complex object of strings", () => {
@@ -81,6 +84,26 @@ describe("Temporal Zod Schemas", () => {
     const validDuration = Temporal.Duration.from({ hours: 1, minutes: 30 });
     const result = zDuration.safeParse(validDuration);
     expect(result.success).toBe(true);
+  });
+
+  test("should coerce a Date to Temporal.Instant", () => {
+    const date = new Date("2023-01-01T00:00:00Z");
+    const result = zInstant.safeParse(date);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.epochMilliseconds).toBe(date.getTime());
+    }
+  });
+
+  test("should validate Temporal.Instant instance", () => {
+    const instant = Temporal.Instant.from("2023-01-01T00:00:00Z");
+    const result = zInstantInstance.safeParse(instant);
+    expect(result.success).toBe(true);
+  });
+
+  test("should invalidate non-Instant for zInstantInstance", () => {
+    const result = zInstantInstance.safeParse("2023-01-01T00:00:00Z");
+    expect(result.success).toBe(false);
   });
 
   test("should invalidate incorrect Temporal.Instant", () => {

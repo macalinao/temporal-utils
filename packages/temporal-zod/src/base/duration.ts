@@ -1,7 +1,7 @@
 import type { z } from "zod";
-import type { ZodTemporal } from "./temporalValidator.js";
+import type { ZodTemporal } from "./temporal-validator.js";
 import { Temporal } from "temporal-polyfill";
-import { temporalValidators } from "./temporalValidator.js";
+import { temporalValidators } from "./temporal-validator.js";
 
 export const Duration: typeof Temporal.Duration = Temporal.Duration;
 
@@ -14,12 +14,7 @@ export const Duration: typeof Temporal.Duration = Temporal.Duration;
 export const DURATION_PATTERN =
   "^-?P(\\d+Y)?(\\d+M)?(\\d+W)?(\\d+D)?(T(\\d+H)?(\\d+M)?((\\d+(\\.\\d+)?)S)?)?$";
 
-const validators = temporalValidators(Duration, {
-  type: "string",
-  id: "Duration",
-  description: "An ISO 8601 duration string (e.g. PT1H30M, P1Y2M3D)",
-  format: "duration",
-});
+const validators = temporalValidators(Duration);
 
 /**
  * Validates or coerces a string to a {@link Temporal.Duration}.

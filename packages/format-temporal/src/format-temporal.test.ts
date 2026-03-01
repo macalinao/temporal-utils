@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 // biome-ignore lint/suspicious/noShadowRestrictedNames: Temporal polyfill Intl
 import { Intl, Temporal } from "temporal-polyfill";
-import { formatTemporal } from "./formatTemporal.js";
+import { formatTemporal } from "./format-temporal.js";
 
 describe("formatTemporal", () => {
   test("should format Temporal.PlainYearMonth correctly", () => {
@@ -70,7 +70,7 @@ describe("formatTemporal", () => {
   });
 
   test("should format Temporal.Instant correctly", () => {
-    const instant = Temporal.Instant.fromEpochMilliseconds(1714857930000);
+    const instant = Temporal.Instant.fromEpochMilliseconds(1_714_857_930_000);
     const formatter = new Intl.DateTimeFormat("en-US", {
       year: "numeric",
       month: "long",

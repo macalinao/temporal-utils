@@ -28,10 +28,10 @@
     "temporal-polyfill": "^0.2 || ^0.3"
   },
   "devDependencies": {
-    "@macalinao/eslint-config": "^7.0.3",
+    "@macalinao/eslint-config": "^8.1.0",
     "@macalinao/tsconfig": "^3.2.5",
     "@types/bun": "latest",
-    "eslint": "^9.23.0",
+    "eslint": "^10.0.2",
     "superjson": "^2.2.2",
     "temporal-polyfill": "^0.3.0",
     "typescript": "^5.8.2"

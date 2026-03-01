@@ -1,7 +1,7 @@
 import type { z } from "zod";
-import type { ZodTemporal } from "./temporalValidator.js";
+import type { ZodTemporal } from "./temporal-validator.js";
 import { Temporal } from "temporal-polyfill";
-import { temporalValidators } from "./temporalValidator.js";
+import { temporalValidators } from "./temporal-validator.js";
 
 export const PlainDate: typeof Temporal.PlainDate = Temporal.PlainDate;
 
@@ -12,12 +12,7 @@ export const PlainDate: typeof Temporal.PlainDate = Temporal.PlainDate;
 export const PLAIN_DATE_PATTERN =
   "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$";
 
-const validators = temporalValidators(PlainDate, {
-  type: "string",
-  id: "PlainDate",
-  description: "An ISO 8601 date string without time (e.g. 2023-01-15)",
-  format: "date",
-});
+const validators = temporalValidators(PlainDate);
 
 /**
  * Validates or coerces a string to a {@link Temporal.PlainDate}.

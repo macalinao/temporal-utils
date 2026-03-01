@@ -2,9 +2,7 @@
 
 {
   packages = with pkgs; [
-    nixfmt-rfc-style
     git
-    biome
   ];
 
   dotenv.enable = true;
@@ -17,7 +15,7 @@
     biome = {
       enable = true;
       name = "biome check";
-      entry = "${pkgs.biome}/bin/biome check --write --unsafe";
+      entry = "./node_modules/.bin/biome check --write --unsafe";
       files = "\\.(js|jsx|ts|tsx|cjs|mjs|cts|mts|json|jsonc)$";
       language = "system";
     };

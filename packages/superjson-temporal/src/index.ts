@@ -1,1 +1,1 @@
-export { registerSuperJSONTemporal } from "./registerSuperJSONTemporal.js";
+export { registerSuperJSONTemporal } from "./register-super-json-temporal.js";
