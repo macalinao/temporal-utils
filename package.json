@@ -16,7 +16,7 @@
     "test:cov": "bun test src/ --coverage",
     "typedoc": "typedoc",
     "ci:version": "changeset version && bun update",
-    "ci:publish": "for dir in packages/*; do (cd \"$dir\" && bun publish || true); done && changeset tag"
+    "ci:publish": "for dir in packages/*; do (cd \"$dir\" && npm publish --provenance --access public || true); done && changeset tag"
   },
   "keywords": [],
   "author": "Ian Macalinao <me@ianm.com>",

@@ -6,5 +6,18 @@
   "entryPointStrategy": "packages",
   "packageOptions": {
     "entryPoints": ["src/index.ts"]
+  },
+  "externalSymbolLinkMappings": {
+    "temporal-spec": {
+      "Temporal.Instant": "https://tc39.es/proposal-temporal/docs/instant.html",
+      "Temporal.PlainDate": "https://tc39.es/proposal-temporal/docs/plaindate.html",
+      "Temporal.PlainTime": "https://tc39.es/proposal-temporal/docs/plaintime.html",
+      "Temporal.PlainDateTime": "https://tc39.es/proposal-temporal/docs/plaindatetime.html",
+      "Temporal.PlainYearMonth": "https://tc39.es/proposal-temporal/docs/plainyearmonth.html",
+      "Temporal.PlainMonthDay": "https://tc39.es/proposal-temporal/docs/plainmonthday.html",
+      "Temporal.ZonedDateTime": "https://tc39.es/proposal-temporal/docs/zoneddatetime.html",
+      "Temporal.Duration": "https://tc39.es/proposal-temporal/docs/duration.html",
+      "Intl.DateTimeFormat": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat"
+    }
   }
 }
