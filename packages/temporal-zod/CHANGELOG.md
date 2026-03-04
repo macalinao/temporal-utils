@@ -1,5 +1,12 @@
 # temporal-zod
 
+## 0.6.1
+
+### Patch Changes
+
+- fdfc623: More docs
+- f3d5140: Update publish config
+
 ## 0.6.0
 
 ### Minor Changes

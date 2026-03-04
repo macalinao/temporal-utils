@@ -1,5 +1,11 @@
 # temporal-quarter-fns
 
+## 0.4.1
+
+### Patch Changes
+
+- f3d5140: Update publish config
+
 ## 0.4.0
 
 ### Minor Changes

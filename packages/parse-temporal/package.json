@@ -2,7 +2,7 @@
   "name": "parse-temporal",
   "description": "Parse Temporal objects from strings.",
   "author": "Ian Macalinao <me@ianm.com>",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "license": "Apache-2.0",
   "type": "module",
   "sideEffects": false,
