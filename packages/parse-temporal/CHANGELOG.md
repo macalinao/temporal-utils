@@ -1,5 +1,11 @@
 # parse-temporal
 
+## 0.5.1
+
+### Patch Changes
+
+- f3d5140: Update publish config
+
 ## 0.5.0
 
 ### Minor Changes
