@@ -41,6 +41,34 @@ const result = schema.parse(input);
 
 You may view the [tests](https://github.com/macalinao/temporal-utils/blob/master/packages/temporal-zod/src/index.test.ts) for more examples.
 
+### JSON Schema Support
+
+The default `temporal-zod` export registers JSON Schema metadata on every validator via Zod's `.meta()`, so `z.toJSONSchema()` works out of the box:
+
+```typescript
+import * as z from "zod";
+import { zPlainDate, zInstant } from "temporal-zod";
+
+const schema = z.object({
+  date: zPlainDate,
+  instant: zInstant,
+});
+
+const jsonSchema = z.toJSONSchema(schema);
+// Produces a JSON Schema with $defs for Temporal.PlainDate, Temporal.Instant,
+// including type, description, pattern, and format where applicable.
+```
+
+### Base Export (No JSON Schema)
+
+If you don't need JSON Schema support, you can import from `temporal-zod/base` for a smaller bundle. This gives you the same validators without the JSON Schema metadata registration side effect:
+
+```typescript
+import { zPlainDate, zInstant } from "temporal-zod/base";
+```
+
+This is backwards-compatible with the pre-JSON Schema versions of `temporal-zod`.
+
 ### With tRPC
 
 If you are using [tRPC](https://trpc.io/), you likely use Zod to validate your inputs and outputs. However, when using it with [Tanstack Query](https://tanstack.com/query), since the Temporal types get mapped to an object, you should ensure that you are using the instance of the Temporal type rather than the one with type coercion. Otherwise, the query cache will not work as expected.
