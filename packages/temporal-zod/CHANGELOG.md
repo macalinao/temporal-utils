@@ -1,5 +1,11 @@
 # temporal-zod
 
+## 0.6.2
+
+### Patch Changes
+
+- 3452230: Fix npm publishing to use trusted publishing via OIDC
+
 ## 0.6.1
 
 ### Patch Changes

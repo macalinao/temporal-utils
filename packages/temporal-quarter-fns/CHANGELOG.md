@@ -1,5 +1,11 @@
 # temporal-quarter-fns
 
+## 0.4.2
+
+### Patch Changes
+
+- 3452230: Fix npm publishing to use trusted publishing via OIDC
+
 ## 0.4.1
 
 ### Patch Changes
