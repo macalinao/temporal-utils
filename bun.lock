@@ -1,13 +1,14 @@
 {
   "lockfileVersion": 1,
+  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "monorepo",
       "devDependencies": {
-        "@biomejs/biome": "^2.4.4",
-        "@changesets/cli": "^2.29.8",
+        "@biomejs/biome": "^2.4.5",
+        "@changesets/cli": "^2.30.0",
         "@macalinao/biome-config": "^0.2.0",
-        "turbo": "^2.8.12",
+        "turbo": "^2.8.13",
         "typedoc": "^0.28.17",
         "typescript": "^5.9.3",
       },
