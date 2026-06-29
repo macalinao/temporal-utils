@@ -22,11 +22,11 @@
   "author": "Ian Macalinao <me@ianm.com>",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@biomejs/biome": "^2.4.5",
-    "@changesets/cli": "^2.30.0",
+    "@biomejs/biome": "^2.5.1",
+    "@changesets/cli": "^2.31.0",
     "@macalinao/biome-config": "^0.2.0",
-    "turbo": "^2.8.13",
-    "typedoc": "^0.28.17",
+    "turbo": "^2.10.0",
+    "typedoc": "^0.28.19",
     "typescript": "^5.9.3"
   },
   "packageManager": "bun@1.3.1",
