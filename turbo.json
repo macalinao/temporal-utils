@@ -7,9 +7,6 @@
     },
     "clean": {
       "cache": false
-    },
-    "lint": {
-      "dependsOn": ["^build"]
     }
   }
 }

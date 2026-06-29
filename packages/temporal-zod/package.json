@@ -1,42 +1,28 @@
 {
   "name": "temporal-zod",
-  "description": "Zod validators for Temporal types.",
-  "author": "Ian Macalinao <me@ianm.com>",
   "version": "0.6.3",
-  "license": "Apache-2.0",
-  "type": "module",
-  "sideEffects": [
-    "./dist/json-schemas.js",
-    "./dist/index.js"
+  "description": "Zod validators for Temporal types.",
+  "keywords": [
+    "temporal",
+    "zod"
   ],
+  "homepage": "https://github.com/macalinao/temporal-utils",
+  "bugs": {
+    "url": "https://github.com/macalinao/temporal-utils/issues"
+  },
+  "license": "Apache-2.0",
+  "author": "Ian Macalinao <me@ianm.com>",
+  "repository": "github:macalinao/temporal-utils",
   "files": [
     "dist/",
     "src/",
     "README.md"
   ],
-  "repository": "github:macalinao/temporal-utils",
-  "homepage": "https://github.com/macalinao/temporal-utils",
-  "bugs": {
-    "url": "https://github.com/macalinao/temporal-utils/issues"
-  },
-  "keywords": [
-    "temporal",
-    "zod"
+  "type": "module",
+  "sideEffects": [
+    "./dist/json-schemas.js",
+    "./dist/index.js"
   ],
-  "dependencies": {
-    "tslib": "^2.8.1"
-  },
-  "devDependencies": {
-    "@macalinao/eslint-config": "^8.1.0",
-    "@macalinao/tsconfig": "^3.2.5",
-    "@types/bun": "latest",
-    "ajv": "^8.18.0",
-    "ajv-formats": "^3.0.1",
-    "eslint": "^10.0.2",
-    "temporal-polyfill": "^0.3.0",
-    "typescript": "^5.9.2",
-    "zod": "^4.1.11"
-  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -49,15 +35,26 @@
       "import": "./dist/base/index.js"
     }
   },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "scripts": {
     "build": "tsc",
     "clean": "tsc --build --clean && rm -fr dist/",
-    "lint": "eslint .",
     "test": "bun test src/"
   },
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/",
-    "access": "public"
+  "dependencies": {
+    "tslib": "^2.8.1"
+  },
+  "devDependencies": {
+    "@macalinao/tsconfig": "^3.2.5",
+    "@types/bun": "latest",
+    "ajv": "^8.18.0",
+    "ajv-formats": "^3.0.1",
+    "temporal-polyfill": "^0.3.0",
+    "typescript": "^5.9.2",
+    "zod": "^4.1.11"
   },
   "peerDependencies": {
     "temporal-polyfill": "^0.3.0",
