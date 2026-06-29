@@ -1,5 +1,11 @@
 # parse-temporal
 
+## 0.5.2
+
+### Patch Changes
+
+- 3452230: Fix npm publishing to use trusted publishing via OIDC
+
 ## 0.5.1
 
 ### Patch Changes

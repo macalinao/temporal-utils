@@ -2,7 +2,7 @@
   "name": "temporal-quarter-fns",
   "description": "Functions for working with quarters in Temporal.",
   "author": "Ian Macalinao <me@ianm.com>",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "license": "Apache-2.0",
   "type": "module",
   "sideEffects": false,
