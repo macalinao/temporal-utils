@@ -1,5 +1,11 @@
 # parse-temporal
 
+## 0.5.3
+
+### Patch Changes
+
+- b8d4d2d: Pin `@biomejs/biome` to 2.4.5 to keep CI lint working with `@macalinao/biome-config`, which does not yet support Biome 2.5.
+
 ## 0.5.2
 
 ### Patch Changes
