@@ -1,0 +1,96 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": [
+    "typescript",
+    "unicorn",
+    "oxc",
+    "import",
+    "promise",
+    "node",
+    "jsdoc"
+  ],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error",
+    "perf": "error"
+  },
+  "options": {
+    "typeAware": true,
+    "typeCheck": true
+  },
+  "env": {
+    "builtin": true,
+    "es2024": true,
+    "node": true,
+    "browser": true
+  },
+  "ignorePatterns": [
+    "**/dist",
+    "**/.turbo",
+    "**/node_modules",
+    "**/*.timestamp-*.mjs"
+  ],
+  "rules": {
+    "typescript/no-floating-promises": "error",
+    "typescript/no-misused-promises": "error",
+    "typescript/await-thenable": "error",
+    "typescript/no-explicit-any": "error",
+    "typescript/no-confusing-void-expression": "error",
+    "typescript/consistent-type-imports": [
+      "error",
+      { "prefer": "type-imports", "fixStyle": "separate-type-imports" }
+    ],
+    "typescript/explicit-member-accessibility": [
+      "error",
+      { "accessibility": "no-public" }
+    ],
+    "no-console": "error",
+
+    "typescript/prefer-readonly-parameter-types": "off",
+    "typescript/no-unsafe-type-assertion": "off",
+    "typescript/strict-boolean-expressions": "off",
+    "typescript/no-unnecessary-condition": "warn",
+    "no-inline-comments": "off",
+    "max-lines-per-function": "off",
+    "max-lines": "off",
+    "max-depth": "off",
+    "max-nested-callbacks": "off",
+    "sort-keys": "off",
+    "sort-imports": "off",
+    "unicorn/no-null": "off",
+    "unicorn/no-array-reduce": "off",
+    "import/no-default-export": "off",
+
+    "no-underscore-dangle": "off",
+    "no-await-in-loop": "off",
+    "jsdoc/check-tag-names": "off",
+    "import/no-unassigned-import": "off",
+    "oxc/only-used-in-recursion": "off",
+    "unicorn/require-module-specifiers": "off",
+    "no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_"
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["**/scripts/**", "**/*.config.{ts,js,mjs,cjs}"],
+      "rules": {
+        "no-console": "off"
+      }
+    },
+    {
+      "files": ["**/*.test.ts", "**/*.test.tsx"],
+      "rules": {
+        "typescript/no-unsafe-type-assertion": "off",
+        "typescript/no-non-null-assertion": "off",
+        "typescript/no-unnecessary-condition": "off",
+        "unicorn/consistent-function-scoping": "off"
+      }
+    }
+  ]
+}
