@@ -130,3 +130,69 @@ describe("Temporal Zod Schemas", () => {
     expect(result.success).toBe(false);
   });
 });
+
+describe("custom errors", () => {
+  test("string error customizes the message for a bad string", () => {
+    const result = zPlainDate.error({ error: "Bad date" }).safeParse("nope");
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.message).toBe("Bad date");
+  });
+
+  test("string error customizes the message for a wrong type", () => {
+    const result = zPlainDate.error({ error: "Bad date" }).safeParse(123);
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.message).toBe("Bad date");
+  });
+
+  test("function error receives the issue", () => {
+    const result = zInstant
+      .error({
+        error: (issue) => `Bad instant: ${String(issue.input)}`,
+      })
+      .safeParse("nope");
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.message).toBe("Bad instant: nope");
+  });
+
+  test("custom error on the instance validator", () => {
+    const result = zPlainDateInstance
+      .error({ error: "Not a PlainDate" })
+      .safeParse("2023-01-01");
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.message).toBe("Not a PlainDate");
+  });
+
+  test("custom error works nested in z.object", () => {
+    const schema = z.object({ date: zPlainDate.error({ error: "Bad date" }) });
+    const ok = schema.safeParse({ date: "2023-01-01" });
+    expect(ok.success).toBe(true);
+    const bad = schema.safeParse({ date: "nope" });
+    expect(bad.success).toBe(false);
+    expect(bad.error?.issues[0]?.message).toBe("Bad date");
+  });
+
+  test("the default validator message is unchanged", () => {
+    const result = zPlainDate.safeParse("nope");
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.message).toBe("Invalid input");
+  });
+
+  test("a custom error still coerces valid input", () => {
+    const result = zPlainDate
+      .error({ error: "Bad date" })
+      .safeParse("2023-01-01");
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).toEqual(Temporal.PlainDate.from("2023-01-01"));
+    }
+  });
+
+  test("Instant still coerces a Date with a custom error set", () => {
+    const date = new Date("2023-01-01T00:00:00Z");
+    const result = zInstant.error({ error: "Bad instant" }).safeParse(date);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.epochMilliseconds).toBe(date.getTime());
+    }
+  });
+});
