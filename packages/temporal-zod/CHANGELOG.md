@@ -1,5 +1,11 @@
 # temporal-zod
 
+## 0.6.3
+
+### Patch Changes
+
+- b8d4d2d: Pin `@biomejs/biome` to 2.4.5 to keep CI lint working with `@macalinao/biome-config`, which does not yet support Biome 2.5.
+
 ## 0.6.2
 
 ### Patch Changes
