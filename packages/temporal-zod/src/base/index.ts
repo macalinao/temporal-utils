@@ -16,7 +16,14 @@
  * @module
  * @see {@link https://github.com/macalinao/temporal-utils/tree/master/packages/temporal-zod | temporal-zod on GitHub}
  */
-export type { ZodTemporal } from "./temporal-validator.js";
+export type {
+  TemporalError,
+  TemporalErrorParams,
+  TemporalInstanceValidator,
+  TemporalValidator,
+  WithError,
+  ZodTemporal,
+} from "./temporal-validator.js";
 export * from "./duration.js";
 export * from "./instant.js";
 export * from "./plain-date.js";

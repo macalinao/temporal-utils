@@ -495,3 +495,48 @@ describe("regex patterns validate correctly", () => {
     });
   }
 });
+
+describe("custom errors preserve JSON Schema metadata", () => {
+  test("a custom-error validator produces the same JSON Schema", () => {
+    const base = z.toJSONSchema(zPlainDate);
+    const custom = z.toJSONSchema(zPlainDate.error({ error: "Bad date" }));
+    expect(custom).toEqual(base);
+    expect(custom).toMatchObject({
+      type: "string",
+      id: "Temporal.PlainDate",
+      format: "date",
+      pattern: PLAIN_DATE_PATTERN,
+    });
+  });
+
+  test("custom-error variant inlines an equivalent schema in z.object()", () => {
+    // The default validator registers the reusable $def (so it $refs); a
+    // custom-error variant is a distinct schema, so it inlines an identical
+    // JSON Schema rather than sharing the $def.
+    const schema = z.toJSONSchema(
+      z.object({
+        a: zPlainDate,
+        b: zPlainDate.error({ error: "Bad date" }),
+      }),
+    );
+    expect(schema).toMatchObject({
+      type: "object",
+      properties: {
+        a: { $ref: "#/$defs/Temporal.PlainDate" },
+        b: {
+          type: "string",
+          id: "Temporal.PlainDate",
+          format: "date",
+          pattern: PLAIN_DATE_PATTERN,
+        },
+      },
+    });
+  });
+
+  test("the custom error is still reported at parse time", () => {
+    const schema = z.object({ date: zPlainDate.error({ error: "Bad date" }) });
+    const result = schema.safeParse({ date: "nope" });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.message).toBe("Bad date");
+  });
+});

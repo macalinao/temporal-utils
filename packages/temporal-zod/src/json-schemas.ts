@@ -3,7 +3,8 @@
  *
  * This is the main entry point of `temporal-zod`. Every validator exported here
  * is a clone of the corresponding base validator with JSON Schema metadata
- * attached via Zod's `.meta()`, so `z.toJSONSchema()` works out of the box.
+ * attached via Zod's `.meta()`, so `z.toJSONSchema()` works out of the box. Each
+ * validator also has an `.error({ error })` method for customizing the error.
  *
  * If you don't need JSON Schema support, import from `temporal-zod/base` instead
  * for a smaller bundle without the metadata registration side effect.
@@ -13,6 +14,7 @@
  */
 import type { Temporal } from "temporal-polyfill";
 import type * as z from "zod";
+import type { WithError } from "./base/index.js";
 import {
   DURATION_PATTERN,
   INSTANT_PATTERN,
@@ -39,6 +41,7 @@ import {
   zZonedDateTime as zZonedDateTimeBase,
   zZonedDateTimeInstance as zZonedDateTimeInstanceBase,
 } from "./base/index.js";
+import { withError } from "./base/temporal-validator.js";
 
 /**
  * Shape of the JSON Schema metadata attached to each Temporal validator.
@@ -52,276 +55,238 @@ interface TemporalJSONSchema {
 }
 
 /**
- * Applies JSON schema metadata to Zod schemas so `z.toJSONSchema()` works.
+ * Attaches JSON Schema metadata to a Zod schema clone.
  *
- * Uses `.meta()` to clone each schema and register metadata in the global
- * registry. The metadata (description, pattern, format) is `Object.assign`ed
- * into the JSON Schema output by Zod's `toJSONSchema()`.
+ * Uses `.meta()` to register metadata in the global registry (the description,
+ * pattern, and format are `Object.assign`ed into the `toJSONSchema()` output).
+ * Sets `_zod.toJSONSchema` to prevent "unrepresentable type" errors for
+ * instanceof/transform schemas, and clears the cloned `_zod.parent` (which would
+ * otherwise crash `flattenRef`, since the original isn't in the seen map).
  *
- * Sets `_zod.toJSONSchema` on every clone to prevent "unrepresentable type"
- * errors for instanceof/transform schemas. Only the first schema (coerce)
- * gets `id` in metadata for `$defs/$ref` dedup in composed schemas.
+ * @param withId - When `true`, the metadata includes `id` so the schema registers
+ *   a reusable `$def`. Only the default coerce validator does this; instance and
+ *   custom-error variants omit it (registering a duplicate id throws), so they
+ *   reference that `$def` via `$ref` (or inline an equivalent schema).
  */
-function registerJSONSchema<T extends [z.ZodType, ...z.ZodType[]]>(
-  schemas: T,
+function decorateJSONSchema<O>(
+  schema: z.ZodType<O>,
   jsonSchema: TemporalJSONSchema,
-): T {
+  withId: boolean,
+): z.ZodType<O> {
   const { id, ...metaWithoutId } = jsonSchema;
-  return schemas.map((schema, i) => {
-    // First schema gets id in metadata for $defs/$ref dedup in composed schemas.
-    // Registering multiple schemas with the same id causes "Duplicate schema id"
-    // errors when both appear in the same z.object().
-    const cloned = schema.meta(i === 0 ? jsonSchema : metaWithoutId);
-    // Override to prevent "unrepresentable type" errors for instanceof/transform
-    // schemas. Include id so standalone conversion includes it for all schemas.
-    cloned._zod.toJSONSchema = () => ({ type: jsonSchema.type, id });
-    // Clear parent ref set by clone() — the original schema won't be in the
-    // toJSONSchema seen map, which causes flattenRef to crash.
-    cloned._zod.parent = undefined;
-    return cloned;
-  }) as unknown as T;
+  const cloned = schema.meta(withId ? jsonSchema : metaWithoutId);
+  cloned._zod.toJSONSchema = () => ({ type: jsonSchema.type, id });
+  cloned._zod.parent = undefined;
+  return cloned;
 }
 
-// Avoid destructured exports (`const [a, b] = ...`) which are incompatible
-// with --isolatedDeclarations. Use indexed access with explicit type annotations.
+/**
+ * Wraps a base validator with JSON Schema metadata, preserving its `.error()`
+ * method. The default is decorated once (the coerce validator registers the
+ * reusable `$def`); `.error({ error })` rebuilds from the base validator's own
+ * `.error()` and re-applies the metadata.
+ */
+function jsonValidator<O>(
+  base: WithError<z.ZodType<O>>,
+  jsonSchema: TemporalJSONSchema,
+  isCoerce: boolean,
+): WithError<z.ZodType<O>> {
+  return withError<z.ZodType<O>>((error) =>
+    decorateJSONSchema(
+      error === undefined ? base : base.error({ error }),
+      jsonSchema,
+      error === undefined && isCoerce,
+    ),
+  );
+}
 
-const _instant = registerJSONSchema([zInstantBase, zInstantInstanceBase], {
+const INSTANT_JSON_SCHEMA: TemporalJSONSchema = {
   type: "string",
   id: "Temporal.Instant",
   description:
     "An ISO 8601 instant string with a required UTC offset (e.g. 2023-01-15T13:45:30Z)",
   format: "date-time",
   pattern: INSTANT_PATTERN,
-});
+};
 /**
  * Validates or coerces a string or `Date` to a {@link Temporal.Instant}.
  *
- * Accepts ISO 8601 instant strings with a required UTC offset
- * (e.g. `2023-01-15T13:45:30Z`), `Date` objects, or existing `Instant` instances.
- *
- * Includes JSON Schema metadata (`format: "date-time"`, `pattern`, `description`)
- * so `z.toJSONSchema()` produces a correct JSON Schema.
+ * Use it directly, or call `.error({ error })` for a copy with a custom error.
+ * Includes JSON Schema metadata so `z.toJSONSchema()` works.
  */
-const zInstant: z.ZodType<Temporal.Instant> = _instant[0];
+const zInstant: WithError<z.ZodType<Temporal.Instant>> = jsonValidator(
+  zInstantBase,
+  INSTANT_JSON_SCHEMA,
+  true,
+);
 /**
  * Validates that the value is an instance of {@link Temporal.Instant}.
  *
  * Unlike {@link zInstant}, this does **not** coerce strings or `Date` objects.
- * Use this when you expect a pre-parsed `Temporal.Instant` instance.
- *
- * Includes JSON Schema metadata so `z.toJSONSchema()` produces a correct JSON Schema.
  */
-const zInstantInstance: z.ZodType<Temporal.Instant> = _instant[1];
-
-const _plainDate = registerJSONSchema(
-  [zPlainDateBase, zPlainDateInstanceBase],
-  {
-    type: "string",
-    id: "Temporal.PlainDate",
-    description: "An ISO 8601 date string without time (e.g. 2023-01-15)",
-    format: "date",
-    pattern: PLAIN_DATE_PATTERN,
-  },
+const zInstantInstance: WithError<z.ZodType<Temporal.Instant>> = jsonValidator(
+  zInstantInstanceBase,
+  INSTANT_JSON_SCHEMA,
+  false,
 );
+
+const PLAIN_DATE_JSON_SCHEMA: TemporalJSONSchema = {
+  type: "string",
+  id: "Temporal.PlainDate",
+  description: "An ISO 8601 date string without time (e.g. 2023-01-15)",
+  format: "date",
+  pattern: PLAIN_DATE_PATTERN,
+};
 /**
  * Validates or coerces a string to a {@link Temporal.PlainDate}.
  *
- * Accepts ISO 8601 date strings without time (e.g. `2023-01-15`)
- * or existing `PlainDate` instances.
- *
- * Includes JSON Schema metadata (`format: "date"`, `pattern`, `description`)
- * so `z.toJSONSchema()` produces a correct JSON Schema.
+ * Use it directly, or call `.error({ error })` for a copy with a custom error.
+ * Includes JSON Schema metadata so `z.toJSONSchema()` works.
  */
-const zPlainDate: z.ZodType<Temporal.PlainDate> = _plainDate[0];
+const zPlainDate: WithError<z.ZodType<Temporal.PlainDate>> = jsonValidator(
+  zPlainDateBase,
+  PLAIN_DATE_JSON_SCHEMA,
+  true,
+);
 /**
  * Validates that the value is an instance of {@link Temporal.PlainDate}.
- *
- * Unlike {@link zPlainDate}, this does **not** coerce strings.
- * Use this when you expect a pre-parsed `Temporal.PlainDate` instance.
- *
- * Includes JSON Schema metadata so `z.toJSONSchema()` produces a correct JSON Schema.
  */
-const zPlainDateInstance: z.ZodType<Temporal.PlainDate> = _plainDate[1];
+const zPlainDateInstance: WithError<z.ZodType<Temporal.PlainDate>> =
+  jsonValidator(zPlainDateInstanceBase, PLAIN_DATE_JSON_SCHEMA, false);
 
-const _plainTime = registerJSONSchema(
-  [zPlainTimeBase, zPlainTimeInstanceBase],
-  {
-    type: "string",
-    id: "Temporal.PlainTime",
-    description:
-      "An ISO 8601 time string without date or timezone (e.g. 13:45:30)",
-    pattern: PLAIN_TIME_PATTERN,
-  },
-);
+const PLAIN_TIME_JSON_SCHEMA: TemporalJSONSchema = {
+  type: "string",
+  id: "Temporal.PlainTime",
+  description:
+    "An ISO 8601 time string without date or timezone (e.g. 13:45:30)",
+  pattern: PLAIN_TIME_PATTERN,
+};
 /**
  * Validates or coerces a string to a {@link Temporal.PlainTime}.
  *
- * Accepts ISO 8601 time strings without date or timezone
- * (e.g. `13:45:30`, `13:45:30.123456789`) or existing `PlainTime` instances.
- *
- * Includes JSON Schema metadata (`pattern`, `description`)
- * so `z.toJSONSchema()` produces a correct JSON Schema.
+ * Use it directly, or call `.error({ error })` for a copy with a custom error.
+ * Includes JSON Schema metadata so `z.toJSONSchema()` works.
  */
-const zPlainTime: z.ZodType<Temporal.PlainTime> = _plainTime[0];
+const zPlainTime: WithError<z.ZodType<Temporal.PlainTime>> = jsonValidator(
+  zPlainTimeBase,
+  PLAIN_TIME_JSON_SCHEMA,
+  true,
+);
 /**
  * Validates that the value is an instance of {@link Temporal.PlainTime}.
- *
- * Unlike {@link zPlainTime}, this does **not** coerce strings.
- * Use this when you expect a pre-parsed `Temporal.PlainTime` instance.
- *
- * Includes JSON Schema metadata so `z.toJSONSchema()` produces a correct JSON Schema.
  */
-const zPlainTimeInstance: z.ZodType<Temporal.PlainTime> = _plainTime[1];
+const zPlainTimeInstance: WithError<z.ZodType<Temporal.PlainTime>> =
+  jsonValidator(zPlainTimeInstanceBase, PLAIN_TIME_JSON_SCHEMA, false);
 
-const _plainDateTime = registerJSONSchema(
-  [zPlainDateTimeBase, zPlainDateTimeInstanceBase],
-  {
-    type: "string",
-    id: "Temporal.PlainDateTime",
-    description:
-      "An ISO 8601 date-time string without timezone (e.g. 2023-01-15T13:45:30)",
-    pattern: PLAIN_DATE_TIME_PATTERN,
-  },
-);
+const PLAIN_DATE_TIME_JSON_SCHEMA: TemporalJSONSchema = {
+  type: "string",
+  id: "Temporal.PlainDateTime",
+  description:
+    "An ISO 8601 date-time string without timezone (e.g. 2023-01-15T13:45:30)",
+  pattern: PLAIN_DATE_TIME_PATTERN,
+};
 /**
  * Validates or coerces a string to a {@link Temporal.PlainDateTime}.
  *
- * Accepts ISO 8601 date-time strings without timezone
- * (e.g. `2023-01-15T13:45:30`) or existing `PlainDateTime` instances.
- *
- * Includes JSON Schema metadata (`pattern`, `description`)
- * so `z.toJSONSchema()` produces a correct JSON Schema.
+ * Use it directly, or call `.error({ error })` for a copy with a custom error.
+ * Includes JSON Schema metadata so `z.toJSONSchema()` works.
  */
-const zPlainDateTime: z.ZodType<Temporal.PlainDateTime> = _plainDateTime[0];
+const zPlainDateTime: WithError<z.ZodType<Temporal.PlainDateTime>> =
+  jsonValidator(zPlainDateTimeBase, PLAIN_DATE_TIME_JSON_SCHEMA, true);
 /**
  * Validates that the value is an instance of {@link Temporal.PlainDateTime}.
- *
- * Unlike {@link zPlainDateTime}, this does **not** coerce strings.
- * Use this when you expect a pre-parsed `Temporal.PlainDateTime` instance.
- *
- * Includes JSON Schema metadata so `z.toJSONSchema()` produces a correct JSON Schema.
  */
-const zPlainDateTimeInstance: z.ZodType<Temporal.PlainDateTime> =
-  _plainDateTime[1];
+const zPlainDateTimeInstance: WithError<z.ZodType<Temporal.PlainDateTime>> =
+  jsonValidator(zPlainDateTimeInstanceBase, PLAIN_DATE_TIME_JSON_SCHEMA, false);
 
-const _plainYearMonth = registerJSONSchema(
-  [zPlainYearMonthBase, zPlainYearMonthInstanceBase],
-  {
-    type: "string",
-    id: "Temporal.PlainYearMonth",
-    description: "An ISO 8601 year-month string (e.g. 2023-01)",
-    pattern: PLAIN_YEAR_MONTH_PATTERN,
-  },
-);
+const PLAIN_YEAR_MONTH_JSON_SCHEMA: TemporalJSONSchema = {
+  type: "string",
+  id: "Temporal.PlainYearMonth",
+  description: "An ISO 8601 year-month string (e.g. 2023-01)",
+  pattern: PLAIN_YEAR_MONTH_PATTERN,
+};
 /**
  * Validates or coerces a string to a {@link Temporal.PlainYearMonth}.
  *
- * Accepts ISO 8601 year-month strings (e.g. `2023-01`)
- * or existing `PlainYearMonth` instances.
- *
- * Includes JSON Schema metadata (`pattern`, `description`)
- * so `z.toJSONSchema()` produces a correct JSON Schema.
+ * Use it directly, or call `.error({ error })` for a copy with a custom error.
+ * Includes JSON Schema metadata so `z.toJSONSchema()` works.
  */
-const zPlainYearMonth: z.ZodType<Temporal.PlainYearMonth> = _plainYearMonth[0];
+const zPlainYearMonth: WithError<z.ZodType<Temporal.PlainYearMonth>> =
+  jsonValidator(zPlainYearMonthBase, PLAIN_YEAR_MONTH_JSON_SCHEMA, true);
 /**
  * Validates that the value is an instance of {@link Temporal.PlainYearMonth}.
- *
- * Unlike {@link zPlainYearMonth}, this does **not** coerce strings.
- * Use this when you expect a pre-parsed `Temporal.PlainYearMonth` instance.
- *
- * Includes JSON Schema metadata so `z.toJSONSchema()` produces a correct JSON Schema.
  */
-const zPlainYearMonthInstance: z.ZodType<Temporal.PlainYearMonth> =
-  _plainYearMonth[1];
+const zPlainYearMonthInstance: WithError<z.ZodType<Temporal.PlainYearMonth>> =
+  jsonValidator(
+    zPlainYearMonthInstanceBase,
+    PLAIN_YEAR_MONTH_JSON_SCHEMA,
+    false,
+  );
 
-const _plainMonthDay = registerJSONSchema(
-  [zPlainMonthDayBase, zPlainMonthDayInstanceBase],
-  {
-    type: "string",
-    id: "Temporal.PlainMonthDay",
-    description: "An ISO 8601 month-day string (e.g. --01-15 or 01-15)",
-    pattern: PLAIN_MONTH_DAY_PATTERN,
-  },
-);
+const PLAIN_MONTH_DAY_JSON_SCHEMA: TemporalJSONSchema = {
+  type: "string",
+  id: "Temporal.PlainMonthDay",
+  description: "An ISO 8601 month-day string (e.g. --01-15 or 01-15)",
+  pattern: PLAIN_MONTH_DAY_PATTERN,
+};
 /**
  * Validates or coerces a string to a {@link Temporal.PlainMonthDay}.
  *
- * Accepts ISO 8601 month-day strings (e.g. `--01-15` or `01-15`)
- * or existing `PlainMonthDay` instances.
- *
- * Includes JSON Schema metadata (`pattern`, `description`)
- * so `z.toJSONSchema()` produces a correct JSON Schema.
+ * Use it directly, or call `.error({ error })` for a copy with a custom error.
+ * Includes JSON Schema metadata so `z.toJSONSchema()` works.
  */
-const zPlainMonthDay: z.ZodType<Temporal.PlainMonthDay> = _plainMonthDay[0];
+const zPlainMonthDay: WithError<z.ZodType<Temporal.PlainMonthDay>> =
+  jsonValidator(zPlainMonthDayBase, PLAIN_MONTH_DAY_JSON_SCHEMA, true);
 /**
  * Validates that the value is an instance of {@link Temporal.PlainMonthDay}.
- *
- * Unlike {@link zPlainMonthDay}, this does **not** coerce strings.
- * Use this when you expect a pre-parsed `Temporal.PlainMonthDay` instance.
- *
- * Includes JSON Schema metadata so `z.toJSONSchema()` produces a correct JSON Schema.
  */
-const zPlainMonthDayInstance: z.ZodType<Temporal.PlainMonthDay> =
-  _plainMonthDay[1];
+const zPlainMonthDayInstance: WithError<z.ZodType<Temporal.PlainMonthDay>> =
+  jsonValidator(zPlainMonthDayInstanceBase, PLAIN_MONTH_DAY_JSON_SCHEMA, false);
 
-const _zonedDateTime = registerJSONSchema(
-  [zZonedDateTimeBase, zZonedDateTimeInstanceBase],
-  {
-    type: "string",
-    id: "Temporal.ZonedDateTime",
-    description:
-      "An ISO 8601 date-time string with timezone offset and IANA annotation (e.g. 2023-01-15T13:45:30+08:00[Asia/Manila])",
-    pattern: ZONED_DATE_TIME_PATTERN,
-  },
-);
+const ZONED_DATE_TIME_JSON_SCHEMA: TemporalJSONSchema = {
+  type: "string",
+  id: "Temporal.ZonedDateTime",
+  description:
+    "An ISO 8601 date-time string with timezone offset and IANA annotation (e.g. 2023-01-15T13:45:30+08:00[Asia/Manila])",
+  pattern: ZONED_DATE_TIME_PATTERN,
+};
 /**
  * Validates or coerces a string to a {@link Temporal.ZonedDateTime}.
  *
- * Accepts ISO 8601 date-time strings with a timezone offset and IANA timezone
- * annotation (e.g. `2023-01-15T13:45:30+08:00[Asia/Manila]`)
- * or existing `ZonedDateTime` instances.
- *
- * Includes JSON Schema metadata (`pattern`, `description`)
- * so `z.toJSONSchema()` produces a correct JSON Schema.
+ * Use it directly, or call `.error({ error })` for a copy with a custom error.
+ * Includes JSON Schema metadata so `z.toJSONSchema()` works.
  */
-const zZonedDateTime: z.ZodType<Temporal.ZonedDateTime> = _zonedDateTime[0];
+const zZonedDateTime: WithError<z.ZodType<Temporal.ZonedDateTime>> =
+  jsonValidator(zZonedDateTimeBase, ZONED_DATE_TIME_JSON_SCHEMA, true);
 /**
  * Validates that the value is an instance of {@link Temporal.ZonedDateTime}.
- *
- * Unlike {@link zZonedDateTime}, this does **not** coerce strings.
- * Use this when you expect a pre-parsed `Temporal.ZonedDateTime` instance.
- *
- * Includes JSON Schema metadata so `z.toJSONSchema()` produces a correct JSON Schema.
  */
-const zZonedDateTimeInstance: z.ZodType<Temporal.ZonedDateTime> =
-  _zonedDateTime[1];
+const zZonedDateTimeInstance: WithError<z.ZodType<Temporal.ZonedDateTime>> =
+  jsonValidator(zZonedDateTimeInstanceBase, ZONED_DATE_TIME_JSON_SCHEMA, false);
 
-const _duration = registerJSONSchema([zDurationBase, zDurationInstanceBase], {
+const DURATION_JSON_SCHEMA: TemporalJSONSchema = {
   type: "string",
   id: "Temporal.Duration",
   description: "An ISO 8601 duration string (e.g. PT1H30M, P1Y2M3D)",
   format: "duration",
   pattern: DURATION_PATTERN,
-});
+};
 /**
  * Validates or coerces a string to a {@link Temporal.Duration}.
  *
- * Accepts ISO 8601 duration strings (e.g. `PT1H30M`, `P1Y2M3D`)
- * or existing `Duration` instances.
- *
- * Includes JSON Schema metadata (`format: "duration"`, `pattern`, `description`)
- * so `z.toJSONSchema()` produces a correct JSON Schema.
+ * Use it directly, or call `.error({ error })` for a copy with a custom error.
+ * Includes JSON Schema metadata so `z.toJSONSchema()` works.
  */
-const zDuration: z.ZodType<Temporal.Duration> = _duration[0];
+const zDuration: WithError<z.ZodType<Temporal.Duration>> = jsonValidator(
+  zDurationBase,
+  DURATION_JSON_SCHEMA,
+  true,
+);
 /**
  * Validates that the value is an instance of {@link Temporal.Duration}.
- *
- * Unlike {@link zDuration}, this does **not** coerce strings.
- * Use this when you expect a pre-parsed `Temporal.Duration` instance.
- *
- * Includes JSON Schema metadata so `z.toJSONSchema()` produces a correct JSON Schema.
  */
-const zDurationInstance: z.ZodType<Temporal.Duration> = _duration[1];
+const zDurationInstance: WithError<z.ZodType<Temporal.Duration>> =
+  jsonValidator(zDurationInstanceBase, DURATION_JSON_SCHEMA, false);
 
 export {
   zDuration,

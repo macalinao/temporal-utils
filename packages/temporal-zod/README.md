@@ -8,7 +8,7 @@ This depends on the [temporal-polyfill](https://www.npmjs.com/package/temporal-p
 
 ## Usage
 
-This library exports two Zod validators for each Temporal type: one with type coercion and one without.
+This library exports two Zod validators for each Temporal type: one with type coercion and one without. Use them directly as schemas, or call `.error({ error })` on any of them for a copy with a custom error message (see [Custom errors](#custom-errors)).
 
 Strings are coerced to the appropriate Temporal type, and for the `Instant` type, `Date` objects are also coerced to `Instant` objects.
 
@@ -41,6 +41,26 @@ const result = schema.parse(input);
 
 You may view the [tests](https://github.com/macalinao/temporal-utils/blob/master/packages/temporal-zod/src/index.test.ts) for more examples.
 
+### Custom errors
+
+Call `.error(...)` on any validator to get a copy with a custom validation error, passing Zod's [`error` param](https://zod.dev/error-customization) — either a string or an error-map function:
+
+```typescript
+import * as z from "zod";
+import { zPlainDate } from "temporal-zod";
+
+const schema = z.object({
+  // string message
+  start: zPlainDate.error({ error: "Please provide a valid start date" }),
+  // error-map function
+  end: zPlainDate.error({
+    error: (issue) => `"${String(issue.input)}" is not a valid date`,
+  }),
+});
+```
+
+The custom error is reported for any invalid input (a malformed string or the wrong type), and works on both the coercing and instance validators. The plain `zPlainDate` keeps its default error.
+
 ### JSON Schema Support
 
 The default `temporal-zod` export registers JSON Schema metadata on every validator via Zod's `.meta()`, so `z.toJSONSchema()` works out of the box:
@@ -65,9 +85,11 @@ If you don't need JSON Schema support, you can import from `temporal-zod/base` f
 
 ```typescript
 import { zPlainDate, zInstant } from "temporal-zod/base";
+
+const schema = z.object({ date: zPlainDate });
 ```
 
-This is backwards-compatible with the pre-JSON Schema versions of `temporal-zod`.
+These are the same validators (including `.error(...)`), just without the JSON Schema metadata registration side effect.
 
 ### With tRPC
 

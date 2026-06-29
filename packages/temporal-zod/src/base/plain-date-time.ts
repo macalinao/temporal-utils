@@ -1,7 +1,9 @@
-import type { z } from "zod";
-import type { ZodTemporal } from "./temporal-validator.js";
+import type {
+  TemporalInstanceValidator,
+  TemporalValidator,
+} from "./temporal-validator.js";
 import { Temporal } from "temporal-polyfill";
-import { temporalValidators } from "./temporal-validator.js";
+import { temporalValidators, withError } from "./temporal-validator.js";
 
 export const PlainDateTime: typeof Temporal.PlainDateTime =
   Temporal.PlainDateTime;
@@ -14,16 +16,18 @@ export const PlainDateTime: typeof Temporal.PlainDateTime =
 export const PLAIN_DATE_TIME_PATTERN =
   "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d(:[0-5]\\d(\\.\\d{1,9})?)?$";
 
-const validators = temporalValidators(PlainDateTime);
-
 /**
  * Validates or coerces a string to a {@link Temporal.PlainDateTime}.
+ *
+ * Use it directly, or call `.error({ error })` for a copy with a custom error
+ * (e.g. `zPlainDateTime.error({ error: "Invalid date-time" })`).
  */
-export const zPlainDateTime: ZodTemporal<typeof PlainDateTime> =
-  validators.coerce;
+export const zPlainDateTime: TemporalValidator<typeof PlainDateTime> =
+  withError((error) => temporalValidators(PlainDateTime, { error }).coerce);
 
 /**
  * Validates that the value is an instance of {@link Temporal.PlainDateTime}.
  */
-export const zPlainDateTimeInstance: z.ZodType<Temporal.PlainDateTime> =
-  validators.instance;
+export const zPlainDateTimeInstance: TemporalInstanceValidator<
+  typeof PlainDateTime
+> = withError((error) => temporalValidators(PlainDateTime, { error }).instance);
