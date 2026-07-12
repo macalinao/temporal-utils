@@ -69,6 +69,36 @@ import { zPlainDate, zInstant } from "temporal-zod/base";
 
 This is backwards-compatible with the pre-JSON Schema versions of `temporal-zod`.
 
+### With oRPC
+
+[oRPC](https://orpc.unnoq.com) generates its OpenAPI documents with its own
+`ZodToJsonSchemaConverter` (from `@orpc/zod/zod4`), which re-implements the
+Zod → JSON Schema conversion instead of calling `z.toJSONSchema()`. Because a
+Temporal validator is a `z.union([...])` under the hood, the converter would
+otherwise emit a messy `anyOf` and drop the `format`/`pattern` metadata.
+
+`temporal-zod/orpc` exports an interceptor that fixes this. Pass it to the
+converter and every Temporal validator renders as the correct string schema:
+
+```typescript
+import { OpenAPIGenerator } from "@orpc/openapi";
+import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
+import { temporalJsonSchemaInterceptor } from "temporal-zod/orpc";
+// Import the main entry once so the JSON Schema metadata is registered.
+import "temporal-zod";
+
+const generator = new OpenAPIGenerator({
+  schemaConverters: [
+    new ZodToJsonSchemaConverter({
+      interceptors: [temporalJsonSchemaInterceptor],
+    }),
+  ],
+});
+```
+
+`@orpc/zod` is an optional peer dependency — the `temporal-zod/orpc` module only
+imports its types, so it adds no runtime dependency to `temporal-zod`.
+
 ### With tRPC
 
 If you are using [tRPC](https://trpc.io/), you likely use Zod to validate your inputs and outputs. However, when using it with [Tanstack Query](https://tanstack.com/query), since the Temporal types get mapped to an object, you should ensure that you are using the instance of the Temporal type rather than the one with type coercion. Otherwise, the query cache will not work as expected.

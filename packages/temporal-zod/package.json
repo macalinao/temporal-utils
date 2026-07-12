@@ -29,6 +29,7 @@
   "devDependencies": {
     "@macalinao/eslint-config": "^8.1.0",
     "@macalinao/tsconfig": "^3.2.5",
+    "@orpc/zod": "^1.14.0",
     "@types/bun": "latest",
     "ajv": "^8.18.0",
     "ajv-formats": "^3.0.1",
@@ -47,6 +48,10 @@
     "./base": {
       "types": "./dist/base/index.d.ts",
       "import": "./dist/base/index.js"
+    },
+    "./orpc": {
+      "types": "./dist/orpc.d.ts",
+      "import": "./dist/orpc.js"
     }
   },
   "scripts": {
@@ -60,7 +65,13 @@
     "access": "public"
   },
   "peerDependencies": {
+    "@orpc/zod": "^1.14.0",
     "temporal-polyfill": "^0.3.0",
     "zod": "^4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@orpc/zod": {
+      "optional": true
+    }
   }
 }
