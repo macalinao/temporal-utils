@@ -48,10 +48,6 @@
     "./base": {
       "types": "./dist/base/index.d.ts",
       "import": "./dist/base/index.js"
-    },
-    "./orpc": {
-      "types": "./dist/orpc.d.ts",
-      "import": "./dist/orpc.js"
     }
   },
   "scripts": {
@@ -65,13 +61,7 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@orpc/zod": "^1.14.0",
     "temporal-polyfill": "^0.3.0",
     "zod": "^4.0.0"
-  },
-  "peerDependenciesMeta": {
-    "@orpc/zod": {
-      "optional": true
-    }
   }
 }

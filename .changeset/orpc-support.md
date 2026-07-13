@@ -2,9 +2,11 @@
 "temporal-zod": minor
 ---
 
-Add oRPC support via a new `temporal-zod/orpc` entry point. It exports
-`temporalJsonSchemaInterceptor`, which you pass to oRPC's
-`ZodToJsonSchemaConverter` so Temporal validators render as correct string JSON
-Schemas (with `format`/`pattern`) instead of the `anyOf` oRPC would otherwise
-produce. `@orpc/zod` is an optional peer dependency and only its types are
-imported, so there is no new runtime dependency.
+Add oRPC support: `temporal-zod` now exports `temporalJsonSchemaInterceptor`,
+which you pass to oRPC's `ZodToJsonSchemaConverter` so Temporal validators render
+as correct string JSON Schemas (with `format`/`pattern`) instead of the `anyOf`
+oRPC would otherwise produce.
+
+`temporal-zod` takes on no dependency on `@orpc/*` — not even a type-only one.
+The interceptor is typed structurally, so consumers who don't use oRPC pay
+nothing and nothing needs to resolve at typecheck time.

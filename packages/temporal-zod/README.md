@@ -77,15 +77,13 @@ Zod → JSON Schema conversion instead of calling `z.toJSONSchema()`. Because a
 Temporal validator is a `z.union([...])` under the hood, the converter would
 otherwise emit a messy `anyOf` and drop the `format`/`pattern` metadata.
 
-`temporal-zod/orpc` exports an interceptor that fixes this. Pass it to the
+`temporal-zod` exports `temporalJsonSchemaInterceptor` to fix this. Pass it to the
 converter and every Temporal validator renders as the correct string schema:
 
 ```typescript
 import { OpenAPIGenerator } from "@orpc/openapi";
 import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
-import { temporalJsonSchemaInterceptor } from "temporal-zod/orpc";
-// Import the main entry once so the JSON Schema metadata is registered.
-import "temporal-zod";
+import { temporalJsonSchemaInterceptor } from "temporal-zod";
 
 const generator = new OpenAPIGenerator({
   schemaConverters: [
@@ -96,8 +94,9 @@ const generator = new OpenAPIGenerator({
 });
 ```
 
-`@orpc/zod` is an optional peer dependency — the `temporal-zod/orpc` module only
-imports its types, so it adds no runtime dependency to `temporal-zod`.
+`temporal-zod` does not depend on `@orpc/*` at all — not even for types. The
+interceptor is typed structurally, so if you don't use oRPC you pay nothing and
+nothing needs to resolve.
 
 ### With tRPC
 

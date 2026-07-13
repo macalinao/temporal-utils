@@ -12,11 +12,9 @@
  *
  * @example
  * ```typescript
- * import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
  * import { OpenAPIGenerator } from "@orpc/openapi";
- * import { temporalJsonSchemaInterceptor } from "temporal-zod/orpc";
- * // Import the main entry once so the JSON Schema metadata is registered.
- * import "temporal-zod";
+ * import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
+ * import { temporalJsonSchemaInterceptor } from "temporal-zod";
  *
  * const generator = new OpenAPIGenerator({
  *   schemaConverters: [
@@ -27,24 +25,51 @@
  * });
  * ```
  *
- * `@orpc/zod` is an optional peer dependency: this module only imports its
- * *types*, so it adds no runtime dependency to `temporal-zod`.
+ * This module deliberately imports **nothing** from `@orpc/*` — not even types.
+ * {@link TemporalSchemaInterceptor} is typed structurally, so it is assignable to
+ * oRPC's `interceptors` option without `temporal-zod` depending on oRPC at all.
+ * A `import type` would still have to resolve in the shipped `.d.ts`, which would
+ * break consumers who don't install `@orpc/zod` and don't set `skipLibCheck`.
+ * The compatibility of this structural type with oRPC's real one is asserted in
+ * `orpc.test.ts`, where `@orpc/zod` is available as a dev dependency.
  *
  * @module
  * @see {@link https://github.com/macalinao/temporal-utils/tree/master/packages/temporal-zod | temporal-zod on GitHub}
  */
-import type { ZodToJsonSchemaConverterOptions } from "@orpc/zod/zod4";
 import * as z from "zod";
 
 /**
- * The interceptor type accepted by oRPC's `ZodToJsonSchemaConverter`.
- *
- * Derived from `@orpc/zod`'s own option types so it stays in sync across
- * versions without depending on any non-exported symbol.
+ * The JSON Schema a Temporal validator converts to. Every `temporal-zod`
+ * validator is an ISO 8601 string, optionally with a `format` and a `pattern`.
  */
-export type TemporalSchemaInterceptor = NonNullable<
-  ZodToJsonSchemaConverterOptions["interceptors"]
->[number];
+export interface TemporalJsonSchema {
+  type: "string";
+  description?: string;
+  format?: string;
+  pattern?: string;
+}
+
+/**
+ * The subset of oRPC's interceptor context that {@link temporalJsonSchemaInterceptor}
+ * actually uses. oRPC passes additional fields (`options`, `lazyDepth`,
+ * `isHandledCustomJSONSchema`); they are accepted and ignored.
+ */
+export interface TemporalSchemaInterceptorOptions<TResult> {
+  schema: z.core.$ZodType;
+  next: () => TResult;
+}
+
+/**
+ * Structural type for an interceptor accepted by oRPC's `ZodToJsonSchemaConverter`.
+ *
+ * Generic over oRPC's result tuple so it stays assignable without naming any
+ * `@orpc/*` type. See the module docs for why this is not imported from oRPC.
+ */
+export type TemporalSchemaInterceptor = <
+  TResult extends [required: boolean, jsonSchema: unknown],
+>(
+  options: TemporalSchemaInterceptorOptions<TResult>,
+) => TResult | [required: true, jsonSchema: TemporalJsonSchema];
 
 /**
  * Makes oRPC's `ZodToJsonSchemaConverter` honor a `temporal-zod` validator's
@@ -65,6 +90,13 @@ export type TemporalSchemaInterceptor = NonNullable<
  * so oRPC's `$ref` dedup and example rendering are unaffected. The registry `id`
  * is dropped: we inline the schema rather than emit a `$ref` to a `$def` the
  * converter never registers.
+ *
+ * @example
+ * ```typescript
+ * new ZodToJsonSchemaConverter({
+ *   interceptors: [temporalJsonSchemaInterceptor],
+ * });
+ * ```
  */
 export const temporalJsonSchemaInterceptor: TemporalSchemaInterceptor = (
   options,
@@ -74,7 +106,7 @@ export const temporalJsonSchemaInterceptor: TemporalSchemaInterceptor = (
     | undefined;
   if (meta && typeof meta.type === "string") {
     const { id: _id, ...jsonSchema } = meta;
-    return [true, jsonSchema] as ReturnType<TemporalSchemaInterceptor>;
+    return [true, jsonSchema as unknown as TemporalJsonSchema];
   }
   return options.next();
 };

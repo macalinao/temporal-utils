@@ -1,3 +1,4 @@
+import type { ZodToJsonSchemaConverterOptions } from "@orpc/zod/zod4";
 import { describe, expect, test } from "bun:test";
 import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
 import * as z from "zod";
@@ -25,6 +26,20 @@ function convert(schema: z.ZodType): Record<string, unknown> {
 }
 
 describe("temporalJsonSchemaInterceptor", () => {
+  /**
+   * `orpc.ts` types the interceptor structurally so `temporal-zod` imports
+   * nothing from `@orpc/*` — even an `import type` would have to resolve in the
+   * shipped `.d.ts`, breaking consumers without `@orpc/zod` who don't set
+   * `skipLibCheck`. This assignment is what keeps the structural type honest:
+   * it fails to compile if oRPC's real interceptor signature ever drifts.
+   */
+  test("structural type is assignable to oRPC's interceptor signature", () => {
+    const asOrpcInterceptor: NonNullable<
+      ZodToJsonSchemaConverterOptions["interceptors"]
+    >[number] = temporalJsonSchemaInterceptor;
+    expect(asOrpcInterceptor).toBe(temporalJsonSchemaInterceptor);
+  });
+
   test("zInstant converts to a clean string schema with format + pattern", () => {
     expect(convert(zInstant)).toEqual({
       type: "string",
