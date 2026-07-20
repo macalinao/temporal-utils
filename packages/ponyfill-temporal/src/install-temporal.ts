@@ -18,7 +18,7 @@ interface MutableTemporalGlobal {
  * Install the Temporal API onto `globalThis` (polyfill-style side effect).
  *
  * If the runtime already exposes a native `globalThis.Temporal`, nothing is
- * mutated and the native API is returned. Otherwise `@js-temporal/polyfill` is
+ * mutated and the native API is returned. Otherwise `temporal-polyfill` is
  * loaded lazily and assigned to `globalThis.Temporal` and
  * `Date.prototype.toTemporalInstant`.
  *

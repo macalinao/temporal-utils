@@ -1,6 +1,6 @@
 {
   "name": "ponyfill-temporal",
-  "description": "Ponyfill for the TC39 Temporal API that conditionally loads @js-temporal/polyfill only when native Temporal is unavailable.",
+  "description": "Ponyfill for the TC39 Temporal API that conditionally loads temporal-polyfill only when native Temporal is unavailable.",
   "author": "Ian Macalinao <me@ianm.com>",
   "version": "0.0.1",
   "license": "Apache-2.0",
@@ -23,7 +23,8 @@
     "tc39"
   ],
   "dependencies": {
-    "@js-temporal/polyfill": "^0.5.1",
+    "temporal-polyfill": "^1.0.1",
+    "temporal-spec": "^1.0.0",
     "tslib": "^2.8.1"
   },
   "devDependencies": {

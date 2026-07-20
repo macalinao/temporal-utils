@@ -5,9 +5,22 @@
 A **ponyfill** for the [TC39 Temporal API](https://tc39.es/proposal-temporal/docs/).
 
 It uses the runtime's native `globalThis.Temporal` when available, and otherwise
-**conditionally loads** [`@js-temporal/polyfill`](https://www.npmjs.com/package/@js-temporal/polyfill)
+**conditionally loads** [`temporal-polyfill`](https://www.npmjs.com/package/temporal-polyfill)
 via a dynamic `import()`. The polyfill is only pulled into your bundle/runtime
 when native Temporal is absent.
+
+## The stack
+
+- **Types:** [`temporal-spec`](https://www.npmjs.com/package/temporal-spec) — a
+  runtime-free, types-only package that models the **native** Temporal API. This
+  package's public types are sourced from it.
+- **Runtime fallback:** [`temporal-polyfill`](https://www.npmjs.com/package/temporal-polyfill)
+  (from `fullcalendar`) — lightweight, actively maintained, and it already types
+  its own exports against `temporal-spec`.
+
+Because the polyfill's runtime is typed against the same spec that models native
+Temporal, the native and polyfilled `Temporal` / `toTemporalInstant` values share
+one type — no casting between "native Temporal" and "polyfill Temporal".
 
 ## Ponyfill vs. polyfill
 
@@ -29,8 +42,10 @@ npm install ponyfill-temporal
 bun add ponyfill-temporal
 ```
 
-`@js-temporal/polyfill` is a dependency, but it is only ever evaluated (via a
-lazy dynamic `import()`) when the runtime does not provide native Temporal.
+`temporal-polyfill` and `temporal-spec` are dependencies. `temporal-spec` is
+types-only (its runtime entry is empty), and `temporal-polyfill` is only ever
+evaluated (via a lazy dynamic `import()`) when the runtime does not provide
+native Temporal.
 
 ## Usage
 
@@ -45,12 +60,13 @@ const today = Temporal.Now.plainDateISO();
 console.log(today.toString());
 ```
 
-`loadTemporal()` returns the same export surface as `@js-temporal/polyfill`:
+`loadTemporal()` returns the `temporal-polyfill` export surface (which mirrors
+native Temporal):
 
 | Export              | Description                                                   |
 | ------------------- | ------------------------------------------------------------- |
 | `Temporal`          | The Temporal namespace object.                                |
-| `Intl`              | The Temporal-aware `Intl` namespace.                          |
+| `Intl`              | The Temporal-aware `Intl` namespace object.                   |
 | `toTemporalInstant` | The function installed as `Date.prototype.toTemporalInstant`. |
 
 Because loading is asynchronous (the polyfill is imported lazily), `loadTemporal`
@@ -83,10 +99,10 @@ Prefer `loadTemporal()` unless you specifically need the global side effect.
 
 ## Why conditional loading?
 
-Importing `@js-temporal/polyfill` unconditionally would always ship the polyfill,
+Importing `temporal-polyfill` unconditionally would always ship the polyfill,
 defeating the purpose on runtimes that already implement Temporal. `loadTemporal`
 checks `typeof globalThis.Temporal` first and only performs
-`await import("@js-temporal/polyfill")` when native Temporal is missing — so the
+`await import("temporal-polyfill")` when native Temporal is missing — so the
 polyfill stays out of the hot path (and, with a bundler that supports it, out of
 the initial chunk) whenever the platform provides Temporal.
 
