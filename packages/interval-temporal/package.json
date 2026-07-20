@@ -21,15 +21,13 @@
     "interval"
   ],
   "dependencies": {
-    "tslib": "^2.8.1"
+    "tslib": "catalog:"
   },
   "devDependencies": {
-    "@macalinao/eslint-config": "^8.1.0",
-    "@macalinao/tsconfig": "^3.2.5",
-    "@types/bun": "latest",
-    "eslint": "^10.0.2",
-    "temporal-polyfill": "^0.3.0",
-    "typescript": "^7.0.2"
+    "@macalinao/tsconfig": "catalog:",
+    "@types/bun": "catalog:",
+    "temporal-polyfill": "catalog:",
+    "typescript": "catalog:"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -42,7 +40,6 @@
   "scripts": {
     "build": "tsc",
     "clean": "tsc --build --clean && rm -fr dist/",
-    "lint": "eslint .",
     "test": "bun test src/"
   },
   "publishConfig": {
