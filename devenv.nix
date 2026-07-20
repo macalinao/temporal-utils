@@ -12,20 +12,22 @@
   };
 
   git-hooks.hooks = {
-    biome = {
+    oxlint = {
       enable = true;
-      name = "biome check";
-      entry = "./node_modules/.bin/biome check --write --unsafe";
-      files = "\\.(js|jsx|ts|tsx|cjs|mjs|cts|mts|json|jsonc)$";
+      name = "oxlint";
+      entry = "./node_modules/.bin/oxlint --disable-nested-config --fix";
+      files = "\\.(js|jsx|ts|tsx|cjs|mjs|cts|mts)$";
       language = "system";
+      pass_filenames = false;
+    };
+    oxfmt = {
+      enable = true;
+      name = "oxfmt";
+      entry = "./node_modules/.bin/oxfmt";
+      files = "\\.(js|jsx|ts|tsx|cjs|mjs|cts|mts|json|jsonc|md|mdx|yaml|yml)$";
+      language = "system";
+      pass_filenames = false;
     };
     nixfmt.enable = true;
-    prettier = {
-      enable = true;
-      types_or = [
-        "markdown"
-        "yaml"
-      ];
-    };
   };
 }

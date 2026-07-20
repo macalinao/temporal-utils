@@ -1,5 +1,6 @@
 /// <reference types="temporal-spec/global" />
 
+import type * as TemporalSpec from "temporal-spec";
 import type { Intl as SpecIntl } from "temporal-spec";
 
 /**
@@ -9,7 +10,7 @@ import type { Intl as SpecIntl } from "temporal-spec";
  * polyfilled `Temporal` / `toTemporalInstant` values share one type and unify
  * with no cast.
  */
-export type TemporalSpecModule = typeof import("temporal-spec");
+export type TemporalSpecModule = typeof TemporalSpec;
 
 /**
  * The Temporal-aware `Intl` namespace object. `temporal-spec` declares `Intl` as

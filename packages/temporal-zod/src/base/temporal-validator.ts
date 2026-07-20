@@ -1,5 +1,8 @@
 import * as z from "zod";
 
+// Matches any constructor without resorting to `any` (which `no-explicit-any`
+// forbids); `InstanceType` resolves the concrete instance type per usage.
+// oxlint-disable-next-line typescript/no-extraneous-class
 declare abstract class Class {
   constructor(..._: unknown[]);
 }

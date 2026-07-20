@@ -1,39 +1,27 @@
 {
   "name": "ponyfill-temporal",
-  "description": "Ponyfill for the TC39 Temporal API that conditionally loads temporal-polyfill only when native Temporal is unavailable.",
-  "author": "Ian Macalinao <me@ianm.com>",
   "version": "0.0.1",
+  "description": "Ponyfill for the TC39 Temporal API that conditionally loads temporal-polyfill only when native Temporal is unavailable.",
+  "keywords": [
+    "polyfill",
+    "ponyfill",
+    "tc39",
+    "temporal"
+  ],
+  "homepage": "https://github.com/macalinao/temporal-utils",
+  "bugs": {
+    "url": "https://github.com/macalinao/temporal-utils/issues"
+  },
   "license": "Apache-2.0",
-  "type": "module",
-  "sideEffects": false,
+  "author": "Ian Macalinao <me@ianm.com>",
+  "repository": "github:macalinao/temporal-utils",
   "files": [
     "dist/",
     "src/",
     "README.md"
   ],
-  "repository": "github:macalinao/temporal-utils",
-  "homepage": "https://github.com/macalinao/temporal-utils",
-  "bugs": {
-    "url": "https://github.com/macalinao/temporal-utils/issues"
-  },
-  "keywords": [
-    "temporal",
-    "ponyfill",
-    "polyfill",
-    "tc39"
-  ],
-  "dependencies": {
-    "temporal-polyfill": "^1.0.1",
-    "temporal-spec": "^1.0.0",
-    "tslib": "^2.8.1"
-  },
-  "devDependencies": {
-    "@macalinao/eslint-config": "^8.1.0",
-    "@macalinao/tsconfig": "^3.2.5",
-    "@types/bun": "latest",
-    "eslint": "^10.0.2",
-    "typescript": "^5.8.2"
-  },
+  "type": "module",
+  "sideEffects": false,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -42,14 +30,23 @@
       "default": "./dist/index.js"
     }
   },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "scripts": {
     "build": "tsc",
     "clean": "tsc --build --clean && rm -fr dist/",
-    "lint": "eslint .",
     "test": "bun test src/"
   },
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/",
-    "access": "public"
+  "dependencies": {
+    "temporal-polyfill": "^1.0.1",
+    "temporal-spec": "^1.0.0",
+    "tslib": "^2.8.1"
+  },
+  "devDependencies": {
+    "@macalinao/tsconfig": "^3.2.5",
+    "@types/bun": "latest",
+    "typescript": "^5.8.2"
   }
 }

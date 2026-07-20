@@ -20,7 +20,6 @@ const getYMD = (
   if (!(a && b && c)) {
     throw new Error(`Invalid date: ${date}`);
   }
-  // biome-ignore lint/nursery/noUnnecessaryConditions: exhaustive switch
   switch (partOrder) {
     case "MDY":
       return [c, a, b];
@@ -28,6 +27,8 @@ const getYMD = (
       return [c, b, a];
     case "YMD":
       return [a, b, c];
+    default:
+      throw new Error(`Invalid part order: ${partOrder as string}`);
   }
 };
 
