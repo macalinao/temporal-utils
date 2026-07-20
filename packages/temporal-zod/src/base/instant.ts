@@ -1,4 +1,4 @@
-import { Temporal } from "temporal-polyfill";
+import { Temporal } from "ponyfill-temporal";
 import * as z from "zod";
 import { temporalValidators } from "./temporal-validator.js";
 

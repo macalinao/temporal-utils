@@ -21,11 +21,11 @@
     "superjson"
   ],
   "dependencies": {
+    "ponyfill-temporal": "workspace:*",
     "tslib": "^2.8.1"
   },
   "peerDependencies": {
-    "superjson": "^2.2.2",
-    "temporal-polyfill": "^0.2 || ^0.3"
+    "superjson": "^2.2.2"
   },
   "devDependencies": {
     "@macalinao/eslint-config": "^8.1.0",
@@ -33,7 +33,6 @@
     "@types/bun": "latest",
     "eslint": "^10.0.2",
     "superjson": "^2.2.2",
-    "temporal-polyfill": "^0.3.0",
     "typescript": "^5.8.2"
   },
   "main": "dist/index.js",

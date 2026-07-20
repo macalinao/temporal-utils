@@ -1,5 +1,5 @@
 // biome-ignore lint/suspicious/noShadowRestrictedNames: Temporal spec Intl
-import type { Intl, Temporal } from "temporal-spec";
+import type { Intl, Temporal } from "ponyfill-temporal";
 
 /**
  * A type that can be formatted using {@link formatTemporal}.
@@ -47,6 +47,10 @@ export const formatTemporal = (
         calendar: (temporal as Temporal.PlainMonthDay).calendarId,
       });
     default:
-      return format.format(temporal);
+      // The `ZonedDateTime`, `PlainYearMonth`, and `PlainMonthDay` cases are
+      // handled above, so `temporal` here is one of the directly-formattable
+      // types; `Symbol.toStringTag` isn't a narrowing discriminant, so we assert
+      // it to `Intl.FormattableTemporalObject`.
+      return format.format(temporal as Intl.FormattableTemporalObject);
   }
 };

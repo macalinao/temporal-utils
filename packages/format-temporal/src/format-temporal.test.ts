@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 // biome-ignore lint/suspicious/noShadowRestrictedNames: Temporal polyfill Intl
-import { Intl, Temporal } from "temporal-polyfill";
+import { Intl, Temporal } from "ponyfill-temporal";
 import { formatTemporal } from "./format-temporal.js";
 
 describe("formatTemporal", () => {

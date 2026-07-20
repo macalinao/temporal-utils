@@ -1,4 +1,4 @@
-import { Temporal } from "temporal-polyfill";
+import { Temporal } from "ponyfill-temporal";
 
 /**
  * A temporal type that can be compared to itself.
@@ -32,11 +32,18 @@ export const TEMPORAL_COMPARATORS: {
     TemporalComparableWithStringTag<TTag>
   >;
 } = {
-  "Temporal.PlainDate": (a, b) => Temporal.PlainDate.compare(a, b),
-  "Temporal.Instant": (a, b) => Temporal.Instant.compare(a, b),
-  "Temporal.PlainDateTime": (a, b) => Temporal.PlainDateTime.compare(a, b),
-  "Temporal.ZonedDateTime": (a, b) => Temporal.ZonedDateTime.compare(a, b),
-  "Temporal.PlainTime": (a, b) => Temporal.PlainTime.compare(a, b),
+  // `Temporal.X.compare` is typed as returning `number` in `temporal-spec`, but
+  // it always yields -1, 0, or 1 at runtime, so we narrow it to the comparator's
+  // result type.
+  "Temporal.PlainDate": (a, b) =>
+    Temporal.PlainDate.compare(a, b) as -1 | 0 | 1,
+  "Temporal.Instant": (a, b) => Temporal.Instant.compare(a, b) as -1 | 0 | 1,
+  "Temporal.PlainDateTime": (a, b) =>
+    Temporal.PlainDateTime.compare(a, b) as -1 | 0 | 1,
+  "Temporal.ZonedDateTime": (a, b) =>
+    Temporal.ZonedDateTime.compare(a, b) as -1 | 0 | 1,
+  "Temporal.PlainTime": (a, b) =>
+    Temporal.PlainTime.compare(a, b) as -1 | 0 | 1,
 };
 
 export const compareTemporals = <T extends TemporalComparable>(

@@ -1,5 +1,5 @@
 import type { SuperJSON } from "superjson";
-import { Temporal } from "temporal-polyfill";
+import { Temporal } from "ponyfill-temporal";
 
 export const registerSuperJSONTemporal = (
   superjson: Pick<SuperJSON, "registerCustom">,

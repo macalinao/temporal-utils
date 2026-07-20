@@ -21,6 +21,7 @@
     "parse"
   ],
   "dependencies": {
+    "ponyfill-temporal": "workspace:*",
     "tslib": "^2.8.1"
   },
   "devDependencies": {
@@ -28,8 +29,6 @@
     "@macalinao/tsconfig": "^3.2.5",
     "@types/bun": "latest",
     "eslint": "^10.0.2",
-    "temporal-polyfill": "^0.3.0",
-    "temporal-spec": "^0.3.0",
     "typescript": "^5.8.2"
   },
   "main": "dist/index.js",
@@ -49,9 +48,5 @@
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
     "access": "public"
-  },
-  "peerDependencies": {
-    "temporal-polyfill": "^0.2 || ^0.3",
-    "temporal-spec": "^0.2 || ^0.3"
   }
 }

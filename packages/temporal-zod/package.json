@@ -24,6 +24,7 @@
     "zod"
   ],
   "dependencies": {
+    "ponyfill-temporal": "workspace:*",
     "tslib": "^2.8.1"
   },
   "devDependencies": {
@@ -33,7 +34,6 @@
     "ajv": "^8.18.0",
     "ajv-formats": "^3.0.1",
     "eslint": "^10.0.2",
-    "temporal-polyfill": "^0.3.0",
     "typescript": "^5.9.2",
     "zod": "^4.1.11"
   },
@@ -60,7 +60,6 @@
     "access": "public"
   },
   "peerDependencies": {
-    "temporal-polyfill": "^0.3.0",
     "zod": "^4.0.0"
   }
 }

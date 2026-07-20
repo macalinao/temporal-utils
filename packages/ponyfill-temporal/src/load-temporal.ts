@@ -1,5 +1,7 @@
 /// <reference types="temporal-spec/global" />
 
+import type { Intl as SpecIntl } from "temporal-spec";
+
 /**
  * The runtime-free, types-only package that models the **native** TC39 Temporal
  * API (`temporal-spec`). Both this ponyfill and `temporal-polyfill` (the runtime
@@ -8,6 +10,29 @@
  * with no cast.
  */
 export type TemporalSpecModule = typeof import("temporal-spec");
+
+/**
+ * The Temporal-aware `Intl` namespace object. `temporal-spec` declares `Intl` as
+ * a type-only namespace (no value export), so its value shape — a
+ * `DateTimeFormat` that can format Temporal objects — is mirrored here from
+ * `temporal-spec`'s own declaration.
+ */
+export interface TemporalIntl {
+  DateTimeFormat: {
+    new (
+      locales?: globalThis.Intl.LocalesArgument,
+      options?: globalThis.Intl.DateTimeFormatOptions,
+    ): SpecIntl.DateTimeFormat;
+    (
+      locales?: globalThis.Intl.LocalesArgument,
+      options?: globalThis.Intl.DateTimeFormatOptions,
+    ): SpecIntl.DateTimeFormat;
+    supportedLocalesOf(
+      locales: globalThis.Intl.LocalesArgument,
+      options?: globalThis.Intl.DateTimeFormatOptions,
+    ): string[];
+  };
+}
 
 /**
  * The Temporal API surface returned by {@link loadTemporal}.
@@ -22,7 +47,7 @@ export type TemporalSpecModule = typeof import("temporal-spec");
  */
 export interface TemporalApi {
   Temporal: TemporalSpecModule["Temporal"];
-  Intl: typeof globalThis.Intl;
+  Intl: TemporalIntl;
   toTemporalInstant: TemporalSpecModule["toTemporalInstant"];
 }
 
@@ -47,10 +72,13 @@ export const isNativeTemporalAvailable = (): boolean =>
  */
 export async function loadTemporal(): Promise<TemporalApi> {
   if (isNativeTemporalAvailable()) {
-    // `temporal-spec/global` types these ambient globals, so no cast is needed.
     return {
+      // `temporal-spec/global` types `globalThis.Temporal`, so no cast is needed.
       Temporal: globalThis.Temporal,
-      Intl: globalThis.Intl,
+      // In a native-Temporal runtime the native `Intl.DateTimeFormat` accepts
+      // Temporal objects, but the standard lib types do not model that, so we
+      // assert it to the Temporal-aware shape.
+      Intl: globalThis.Intl as unknown as TemporalIntl,
       // `toTemporalInstant` is intentionally the free `(this: Date) => Instant`
       // function (mirroring the polyfill's standalone export); it is never
       // invoked with an implicit `this`, so unbound-method does not apply.
