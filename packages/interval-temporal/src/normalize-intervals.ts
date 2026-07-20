@@ -10,7 +10,7 @@ import { compareTemporals } from "./comparators.js";
 export const normalizeIntervals = <T extends TemporalComparable>(
   intervals: Interval<T>[],
 ): Interval<T>[] => {
-  const sortedIntervals = intervals.sort((a, b) =>
+  const sortedIntervals = intervals.toSorted((a, b) =>
     compareTemporals<T>(a.start, b.start),
   );
   const firstInterval = sortedIntervals[0];

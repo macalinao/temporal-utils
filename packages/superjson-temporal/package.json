@@ -1,39 +1,25 @@
 {
   "name": "superjson-temporal",
-  "description": "SuperJSON serializers/deserializers for Temporal types.",
-  "author": "Ian Macalinao <me@ianm.com>",
   "version": "0.5.3",
+  "description": "SuperJSON serializers/deserializers for Temporal types.",
+  "keywords": [
+    "superjson",
+    "temporal"
+  ],
+  "homepage": "https://github.com/macalinao/temporal-utils",
+  "bugs": {
+    "url": "https://github.com/macalinao/temporal-utils/issues"
+  },
   "license": "Apache-2.0",
-  "type": "module",
-  "sideEffects": false,
+  "author": "Ian Macalinao <me@ianm.com>",
+  "repository": "github:macalinao/temporal-utils",
   "files": [
     "dist/",
     "src/",
     "README.md"
   ],
-  "repository": "github:macalinao/temporal-utils",
-  "homepage": "https://github.com/macalinao/temporal-utils",
-  "bugs": {
-    "url": "https://github.com/macalinao/temporal-utils/issues"
-  },
-  "keywords": [
-    "temporal",
-    "superjson"
-  ],
-  "dependencies": {
-    "tslib": "catalog:"
-  },
-  "peerDependencies": {
-    "superjson": "^2.2.2",
-    "temporal-polyfill": "^0.2 || ^0.3"
-  },
-  "devDependencies": {
-    "@macalinao/tsconfig": "catalog:",
-    "@types/bun": "catalog:",
-    "superjson": "^2.2.2",
-    "temporal-polyfill": "catalog:",
-    "typescript": "catalog:"
-  },
+  "type": "module",
+  "sideEffects": false,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -42,13 +28,27 @@
       "default": "./dist/index.js"
     }
   },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "scripts": {
     "build": "tsc",
     "clean": "tsc --build --clean && rm -fr dist/",
     "test": "bun test src/"
   },
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/",
-    "access": "public"
+  "dependencies": {
+    "tslib": "catalog:"
+  },
+  "devDependencies": {
+    "@macalinao/tsconfig": "catalog:",
+    "@types/bun": "catalog:",
+    "superjson": "^2.2.2",
+    "temporal-polyfill": "catalog:",
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "superjson": "^2.2.2",
+    "temporal-polyfill": "^0.2 || ^0.3"
   }
 }

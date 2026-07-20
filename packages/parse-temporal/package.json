@@ -1,25 +1,42 @@
 {
   "name": "parse-temporal",
-  "description": "Parse Temporal objects from strings.",
-  "author": "Ian Macalinao <me@ianm.com>",
   "version": "0.5.3",
+  "description": "Parse Temporal objects from strings.",
+  "keywords": [
+    "parse",
+    "temporal"
+  ],
+  "homepage": "https://github.com/macalinao/temporal-utils",
+  "bugs": {
+    "url": "https://github.com/macalinao/temporal-utils/issues"
+  },
   "license": "Apache-2.0",
-  "type": "module",
-  "sideEffects": false,
+  "author": "Ian Macalinao <me@ianm.com>",
+  "repository": "github:macalinao/temporal-utils",
   "files": [
     "dist/",
     "src/",
     "README.md"
   ],
-  "repository": "github:macalinao/temporal-utils",
-  "homepage": "https://github.com/macalinao/temporal-utils",
-  "bugs": {
-    "url": "https://github.com/macalinao/temporal-utils/issues"
+  "type": "module",
+  "sideEffects": false,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   },
-  "keywords": [
-    "temporal",
-    "parse"
-  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "tsc --build --clean && rm -fr dist/",
+    "test": "bun test src/"
+  },
   "dependencies": {
     "tslib": "catalog:"
   },
@@ -29,23 +46,6 @@
     "temporal-polyfill": "catalog:",
     "temporal-spec": "catalog:",
     "typescript": "catalog:"
-  },
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    }
-  },
-  "scripts": {
-    "build": "tsc",
-    "clean": "tsc --build --clean && rm -fr dist/",
-    "test": "bun test src/"
-  },
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/",
-    "access": "public"
   },
   "peerDependencies": {
     "temporal-polyfill": "^0.2 || ^0.3",
