@@ -128,13 +128,9 @@
         "zod": "^4.1.11",
       },
       "peerDependencies": {
-        "@orpc/zod": "^1.14.0",
         "temporal-polyfill": "^0.3.0",
         "zod": "^4.0.0",
       },
-      "optionalPeers": [
-        "@orpc/zod",
-      ],
     },
   },
   "packages": {
