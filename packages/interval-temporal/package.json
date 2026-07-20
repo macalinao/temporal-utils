@@ -29,7 +29,7 @@
     "@types/bun": "latest",
     "eslint": "^10.0.2",
     "temporal-polyfill": "^0.3.0",
-    "typescript": "^5.8.2"
+    "typescript": "^7.0.2"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
