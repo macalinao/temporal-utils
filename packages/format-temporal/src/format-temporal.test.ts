@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { Intl, Temporal } from "temporal-polyfill";
+import { Intl, Temporal } from "ponyfill-temporal";
 import { formatTemporal } from "./format-temporal.js";
 
 describe("formatTemporal", () => {
@@ -10,7 +10,7 @@ describe("formatTemporal", () => {
       month: "long",
     });
     const result = formatTemporal(plainYearMonth, formatter);
-    expect(result).toBe("2023 May");
+    expect(result).toBe("May 2023");
   });
 
   test("should format Temporal.PlainDateTime correctly", () => {

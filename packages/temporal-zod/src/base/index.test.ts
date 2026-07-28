@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { Temporal } from "temporal-polyfill";
+import { Temporal } from "ponyfill-temporal";
 import * as z from "zod";
 import { zDuration } from "./duration.js";
 import { zInstant, zInstantInstance } from "./instant.js";

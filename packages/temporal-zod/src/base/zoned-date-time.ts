@@ -1,6 +1,6 @@
 import type { z } from "zod";
 import type { ZodTemporal } from "./temporal-validator.js";
-import { Temporal } from "temporal-polyfill";
+import { Temporal } from "ponyfill-temporal";
 import { temporalValidators } from "./temporal-validator.js";
 
 export const ZonedDateTime: typeof Temporal.ZonedDateTime =

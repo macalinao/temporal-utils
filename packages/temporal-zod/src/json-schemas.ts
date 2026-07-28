@@ -11,7 +11,7 @@
  * @module
  * @see {@link https://github.com/macalinao/temporal-utils/tree/master/packages/temporal-zod | temporal-zod on GitHub}
  */
-import type { Temporal } from "temporal-polyfill";
+import type { Temporal } from "ponyfill-temporal";
 import type * as z from "zod";
 import {
   DURATION_PATTERN,

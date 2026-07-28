@@ -17,92 +17,90 @@
       "name": "format-temporal",
       "version": "0.5.4",
       "dependencies": {
+        "ponyfill-temporal": "workspace:*",
         "tslib": "^2.8.1",
       },
       "devDependencies": {
         "@macalinao/tsconfig": "^3.2.5",
         "@types/bun": "latest",
-        "temporal-polyfill": "^0.3.0",
-        "temporal-spec": "^0.3.0",
         "typescript": "^5.8.2",
-      },
-      "peerDependencies": {
-        "temporal-spec": "^0.3.0",
       },
     },
     "packages/interval-temporal": {
       "name": "interval-temporal",
       "version": "0.5.4",
       "dependencies": {
+        "ponyfill-temporal": "workspace:*",
         "tslib": "^2.8.1",
       },
       "devDependencies": {
         "@macalinao/tsconfig": "^3.2.5",
         "@types/bun": "latest",
-        "temporal-polyfill": "^0.3.0",
         "typescript": "^5.8.2",
-      },
-      "peerDependencies": {
-        "temporal-polyfill": "^0.2 || ^0.3",
       },
     },
     "packages/parse-temporal": {
       "name": "parse-temporal",
       "version": "0.5.4",
       "dependencies": {
+        "ponyfill-temporal": "workspace:*",
         "tslib": "^2.8.1",
       },
       "devDependencies": {
         "@macalinao/tsconfig": "^3.2.5",
         "@types/bun": "latest",
-        "temporal-polyfill": "^0.3.0",
-        "temporal-spec": "^0.3.0",
         "typescript": "^5.8.2",
       },
-      "peerDependencies": {
-        "temporal-polyfill": "^0.2 || ^0.3",
-        "temporal-spec": "^0.2 || ^0.3",
+    },
+    "packages/ponyfill-temporal": {
+      "name": "ponyfill-temporal",
+      "version": "0.0.1",
+      "dependencies": {
+        "temporal-polyfill": "^1.0.1",
+        "temporal-spec": "^1.0.0",
+        "tslib": "^2.8.1",
+      },
+      "devDependencies": {
+        "@macalinao/tsconfig": "^3.2.5",
+        "@types/bun": "latest",
+        "typescript": "^5.8.2",
       },
     },
     "packages/superjson-temporal": {
       "name": "superjson-temporal",
       "version": "0.5.3",
       "dependencies": {
+        "ponyfill-temporal": "workspace:*",
         "tslib": "^2.8.1",
       },
       "devDependencies": {
         "@macalinao/tsconfig": "^3.2.5",
         "@types/bun": "latest",
         "superjson": "^2.2.2",
-        "temporal-polyfill": "^0.3.0",
         "typescript": "^5.8.2",
       },
       "peerDependencies": {
         "superjson": "^2.2.2",
-        "temporal-polyfill": "^0.2 || ^0.3",
       },
     },
     "packages/temporal-quarter-fns": {
       "name": "temporal-quarter-fns",
       "version": "0.4.3",
       "dependencies": {
+        "ponyfill-temporal": "workspace:*",
         "tslib": "^2.8.1",
       },
       "devDependencies": {
         "@macalinao/tsconfig": "^3.2.5",
         "@types/bun": "latest",
-        "temporal-polyfill": "^0.3.0",
-        "temporal-spec": "^0.3.0",
         "typescript": "^5.8.2",
-      },
-      "peerDependencies": {
-        "temporal-spec": "^0.3.0",
       },
     },
     "packages/temporal-zod": {
       "name": "temporal-zod",
       "version": "0.6.3",
       "dependencies": {
+        "ponyfill-temporal": "workspace:*",
         "tslib": "^2.8.1",
       },
       "devDependencies": {
@@ -110,12 +108,10 @@
         "@types/bun": "latest",
         "ajv": "^8.18.0",
         "ajv-formats": "^3.0.1",
-        "temporal-polyfill": "^0.3.0",
         "typescript": "^5.9.2",
         "zod": "^4.1.11",
       },
       "peerDependencies": {
-        "temporal-polyfill": "^0.3.0",
         "zod": "^4.0.0",
       },
     },
@@ -435,6 +431,8 @@
 
     "pify": ["pify@4.0.1", "", {}, "sha512-uB80kBFb/tfd68bVleG9T5GGsGPjJrLAUpR5PZIrhBnIaRTQRjqdJSsIKkOP6OAIFbj7GOrcudc5pNjZ+geV2g=="],
 
+    "ponyfill-temporal": ["ponyfill-temporal@workspace:packages/ponyfill-temporal"],
+
     "prettier": ["prettier@2.8.8", "", { "bin": { "prettier": "bin-prettier.js" } }, "sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q=="],
 
     "punycode.js": ["punycode.js@2.3.1", "", {}, "sha512-uxFIHU0YlHYhDQtV4R9J6a52SLx28BCjT+4ieh7IGbgwVJWO+km431c4yRlREUAsAmt/uMjQUyQHNEPf0M39CA=="],
@@ -477,11 +475,13 @@
 
     "superjson-temporal": ["superjson-temporal@workspace:packages/superjson-temporal"],
 
-    "temporal-polyfill": ["temporal-polyfill@0.3.0", "", { "dependencies": { "temporal-spec": "0.3.0" } }, "sha512-qNsTkX9K8hi+FHDfHmf22e/OGuXmfBm9RqNismxBrnSmZVJKegQ+HYYXT+R7Ha8F/YSm2Y34vmzD4cxMu2u95g=="],
+    "temporal-polyfill": ["temporal-polyfill@1.0.1", "", { "dependencies": { "temporal-spec": "1.0.0", "temporal-utils": "1.0.1" } }, "sha512-N2SoI9olnW7BUsU8RosDphZQl9s+WJ8O7PoJMFCr/e5/1rFkVI4GNOWaSeySG+UoP04foPYsnLWbJmbXOiShZg=="],
 
     "temporal-quarter-fns": ["temporal-quarter-fns@workspace:packages/temporal-quarter-fns"],
 
-    "temporal-spec": ["temporal-spec@0.3.0", "", {}, "sha512-n+noVpIqz4hYgFSMOSiINNOUOMFtV5cZQNCmmszA6GiVFVRt3G7AqVyhXjhCSmowvQn+NsGn+jMDMKJYHd3bSQ=="],
+    "temporal-spec": ["temporal-spec@1.0.0", "", {}, "sha512-00Ahj1e1ifaERTMOIIGpOCdOo9IEk2m6GGSMedsn9a2SIsGLdOTbmME1Htv6IM82b6VHrzSUTIVc7YHy6hdhFQ=="],
+
+    "temporal-utils": ["temporal-utils@1.0.1", "", {}, "sha512-HAixuesxFQIUaQk3ptX2jhfO/FsOkgVkDDMawvp6n/fkB1q6BKfs3lURw9I+pK/2e2e/q/vrLrxmeqauBoyGMQ=="],
 
     "temporal-zod": ["temporal-zod@workspace:packages/temporal-zod"],
 

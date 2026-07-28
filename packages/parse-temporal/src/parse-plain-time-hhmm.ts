@@ -1,4 +1,4 @@
-import { Temporal } from "temporal-polyfill";
+import { Temporal } from "ponyfill-temporal";
 
 /**
  * Parses a time in HHMM to a {@link Temporal.PlainTime}.

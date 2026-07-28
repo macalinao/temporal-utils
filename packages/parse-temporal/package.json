@@ -38,17 +38,12 @@
     "test": "bun test src/"
   },
   "dependencies": {
+    "ponyfill-temporal": "workspace:*",
     "tslib": "^2.8.1"
   },
   "devDependencies": {
     "@macalinao/tsconfig": "^3.2.5",
     "@types/bun": "latest",
-    "temporal-polyfill": "^0.3.0",
-    "temporal-spec": "^0.3.0",
     "typescript": "^5.8.2"
-  },
-  "peerDependencies": {
-    "temporal-polyfill": "^0.2 || ^0.3",
-    "temporal-spec": "^0.2 || ^0.3"
   }
 }

@@ -7,7 +7,7 @@ import * as _addFormats from "ajv-formats";
 // CJS/ESM interop: ajv-formats default export type is lost through namespace import
 const addFormats = _addFormats.default as unknown as FormatsPlugin;
 
-import { Temporal } from "temporal-polyfill";
+import { Temporal } from "ponyfill-temporal";
 import * as z from "zod";
 import {
   DURATION_PATTERN,
