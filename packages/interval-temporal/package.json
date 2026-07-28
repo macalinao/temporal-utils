@@ -1,6 +1,6 @@
 {
   "name": "interval-temporal",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "description": "An interval type for Temporal. Also contains helpers for comparing and sorting Temporal objects.",
   "keywords": [
     "interval",
