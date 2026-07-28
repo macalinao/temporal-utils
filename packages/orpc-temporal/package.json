@@ -1,0 +1,55 @@
+{
+  "name": "orpc-temporal",
+  "version": "0.0.0",
+  "description": "oRPC custom JSON serializers for Temporal types.",
+  "keywords": [
+    "orpc",
+    "temporal"
+  ],
+  "homepage": "https://github.com/macalinao/temporal-utils",
+  "bugs": {
+    "url": "https://github.com/macalinao/temporal-utils/issues"
+  },
+  "license": "Apache-2.0",
+  "author": "Ian Macalinao <me@ianm.com>",
+  "repository": "github:macalinao/temporal-utils",
+  "files": [
+    "dist/",
+    "src/",
+    "README.md"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "tsc --build --clean && rm -fr dist/",
+    "test": "bun test src/"
+  },
+  "dependencies": {
+    "tslib": "^2.8.1"
+  },
+  "devDependencies": {
+    "@macalinao/tsconfig": "^3.2.5",
+    "@orpc/client": "^1.14.12",
+    "@orpc/server": "^1.14.12",
+    "@types/bun": "latest",
+    "temporal-polyfill": "^0.3.0",
+    "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "@orpc/client": "^1.14.0",
+    "temporal-polyfill": "^0.2 || ^0.3"
+  }
+}
