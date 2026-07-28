@@ -247,6 +247,32 @@ describe("JSON.parse(JSON.stringify(...)) round-trip validates against generated
         expect(validate(serialized)).toBe(true);
       });
 
+      test("serialized non-ISO calendar values validate", () => {
+        // toJSON() appends [u-ca=…] here, and PlainYearMonth/PlainMonthDay
+        // switch to a full reference date. The generated schema has to accept
+        // all of it, or an OpenAPI consumer would reject what the server sends.
+        //
+        // plainDate stays ISO: it is the one calendar-bearing type that also
+        // declares `format: "date"`, which by definition cannot hold an
+        // annotation. See the dedicated test below.
+        const hebrewDate =
+          Temporal.PlainDate.from("2023-01-15").withCalendar("hebrew");
+        const serialized: unknown = JSON.parse(
+          JSON.stringify({
+            ...temporalObject,
+            plainDateTime: Temporal.PlainDateTime.from(
+              "2023-01-15T13:45:30",
+            ).withCalendar("hebrew"),
+            plainYearMonth: hebrewDate.toPlainYearMonth(),
+            plainMonthDay: hebrewDate.toPlainMonthDay(),
+            zonedDateTime: Temporal.ZonedDateTime.from(
+              "2023-01-15T13:45:30+08:00[Asia/Manila]",
+            ).withCalendar("hebrew"),
+          }),
+        );
+        expect(validate(serialized)).toBe(true);
+      });
+
       test("rejects object with invalid field values", () => {
         const bad = {
           ...(JSON.parse(JSON.stringify(temporalObject)) as Record<
@@ -263,6 +289,36 @@ describe("JSON.parse(JSON.stringify(...)) round-trip validates against generated
       });
     });
   }
+});
+
+/**
+ * `PLAIN_DATE_PATTERN` accepts the `[u-ca=…]` annotation, but `format: "date"`
+ * is RFC 3339 full-date and cannot. PlainDate is the only calendar-bearing type
+ * that declares a `format`, so it is the only place the two disagree.
+ *
+ * The `format` is kept because it is correct and useful for the overwhelmingly
+ * common ISO case, and because `format` is an annotation rather than an
+ * assertion unless a validator opts in (as ajv-formats does here). Dropping it
+ * would degrade every ISO consumer to fix a rare one. Worth revisiting if
+ * non-ISO calendars become a first-class use case.
+ */
+describe("PlainDate format vs. calendar annotation", () => {
+  const ajv = addFormats(new Ajv2020(), { mode: "fast" });
+  const validate: ValidateFunction = ajv.compile(
+    stripZodId(z.toJSONSchema(zPlainDate)) as Record<string, unknown>,
+  );
+  const hebrew = Temporal.PlainDate.from("2023-01-15")
+    .withCalendar("hebrew")
+    .toJSON();
+
+  test("the pattern accepts an annotated date", () => {
+    expect(new RegExp(PLAIN_DATE_PATTERN).test(hebrew)).toBe(true);
+  });
+
+  test('but format: "date" does not', () => {
+    expect(validate(hebrew)).toBe(false);
+    expect(validate("2023-01-15")).toBe(true);
+  });
 });
 
 describe("full JSON Schema snapshot for all types", () => {
@@ -425,8 +481,24 @@ describe("regex patterns validate correctly", () => {
     {
       name: "PlainDate",
       pattern: PLAIN_DATE_PATTERN,
-      valid: ["2023-01-15", "2023-12-31"],
-      invalid: ["2023-00-15", "2023-13-15", "2023-01-32", "2023-01-15T13:45"],
+      valid: [
+        "2023-01-15",
+        "2023-12-31",
+        // Non-ISO calendar annotation, as emitted by toJSON().
+        "2023-01-15[u-ca=hebrew]",
+        "2023-01-15[u-ca=islamic-umalqura]",
+        // Signed six-digit year, for years outside 0000-9999.
+        "-000753-04-21",
+        "+010000-01-01",
+      ],
+      invalid: [
+        "2023-00-15",
+        "2023-13-15",
+        "2023-01-32",
+        "2023-01-15T13:45",
+        "2023-01-15[u-ca=]",
+        "2023-01-15[nonsense]",
+      ],
     },
     {
       name: "PlainTime",
@@ -441,20 +513,23 @@ describe("regex patterns validate correctly", () => {
         "2023-01-15T13:45",
         "2023-01-15T13:45:30",
         "2023-01-15T13:45:30.123",
+        "2023-01-15T13:45:30[u-ca=hebrew]",
       ],
       invalid: ["2023-01-15T13:45:30Z", "2023-13-15T13:45:30"],
     },
     {
       name: "PlainYearMonth",
       pattern: PLAIN_YEAR_MONTH_PATTERN,
-      valid: ["2023-01", "2023-12"],
-      invalid: ["2023-00", "2023-13", "2023-01-15"],
+      // Under a non-ISO calendar toJSON() emits a full reference date, so that
+      // form is valid — but only with the annotation, so a bare date is not.
+      valid: ["2023-01", "2023-12", "2022-12-25[u-ca=hebrew]"],
+      invalid: ["2023-00", "2023-13", "2023-01-15", "2023-01-15[u-ca=]"],
     },
     {
       name: "PlainMonthDay",
       pattern: PLAIN_MONTH_DAY_PATTERN,
-      valid: ["01-15", "--01-15"],
-      invalid: ["13-15", "01-32"],
+      valid: ["01-15", "--01-15", "1972-12-27[u-ca=hebrew]"],
+      invalid: ["13-15", "01-32", "2023-01-15", "1972-12-27"],
     },
     {
       name: "ZonedDateTime",
@@ -463,10 +538,16 @@ describe("regex patterns validate correctly", () => {
         "2023-01-15T13:45:30+08:00[Asia/Manila]",
         "2023-01-15T13:45:30Z[UTC]",
         "2023-01-15T13:45:30.123+00:00[Europe/London]",
+        "2023-01-15T13:45:30+08:00[Asia/Manila][u-ca=hebrew]",
+        "2023-01-15T13:45:30-03:00[America/Argentina/Buenos_Aires]",
+        "2023-01-15T13:45:30+08:00[+08:00]",
       ],
       invalid: [
         "2023-01-15T13:45:30+08:00",
         "2023-01-15T13:45:30[Asia/Manila]",
+        // The time zone group must not swallow a second bracket group.
+        "2023-01-15T13:45:30+08:00[not a time zone!][]",
+        "2023-01-15T13:45:30+08:00[Asia/Manila][u-ca=]",
       ],
     },
     {

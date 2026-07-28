@@ -98,6 +98,23 @@ const generator = new OpenAPIGenerator({
 interceptor is typed structurally, so if you don't use oRPC you pay nothing and
 nothing needs to resolve.
 
+The interceptor is driven by each validator's metadata rather than by a
+per-type list, so all eight Temporal types are covered — `Instant`,
+`ZonedDateTime`, `PlainDate`, `PlainTime`, `PlainDateTime`, `PlainYearMonth`,
+`PlainMonthDay`, and `Duration` — in both the coercing and `*Instance` variants.
+
+Values travel as the plain ISO strings `toJSON()` produces, and the validator on
+the receiving end revives them. The published `pattern` accepts everything
+`toJSON()` can emit, including the `[u-ca=…]` annotation added under a non-ISO
+calendar, the full reference-date form `PlainYearMonth` and `PlainMonthDay` take
+under such a calendar, and signed six-digit years.
+
+One boundary is worth knowing: `PlainDate` also advertises `format: "date"`,
+which is RFC 3339 full-date and cannot carry an annotation. A validator that
+asserts `format` will therefore reject a non-ISO `PlainDate` even though the
+`pattern` accepts it. The `format` is kept because it is correct and useful for
+the ISO case, which is the overwhelmingly common one.
+
 ### With tRPC
 
 If you are using [tRPC](https://trpc.io/), you likely use Zod to validate your inputs and outputs. However, when using it with [Tanstack Query](https://tanstack.com/query), since the Temporal types get mapped to an object, you should ensure that you are using the instance of the Temporal type rather than the one with type coercion. Otherwise, the query cache will not work as expected.

@@ -1,6 +1,13 @@
 import type { z } from "zod";
 import type { ZodTemporal } from "./temporal-validator.js";
 import { Temporal } from "temporal-polyfill";
+import {
+  CALENDAR_PART,
+  DATE_PART,
+  MONTH_PART,
+  OPTIONAL_CALENDAR_PART,
+  YEAR_PART,
+} from "./iso-pattern-parts.js";
 import { temporalValidators } from "./temporal-validator.js";
 
 export const PlainYearMonth: typeof Temporal.PlainYearMonth =
@@ -9,8 +16,13 @@ export const PlainYearMonth: typeof Temporal.PlainYearMonth =
 /**
  * Regex pattern for {@link Temporal.PlainYearMonth} ISO 8601 strings (e.g. `2023-01`).
  * Validates month (01–12).
+ *
+ * Under a non-ISO calendar `toJSON()` emits a full reference date rather than
+ * `YYYY-MM` (e.g. `2022-12-25[u-ca=hebrew]`), so that form is accepted too —
+ * but only with the calendar annotation present, so a bare `2023-01-15` is
+ * still rejected.
  */
-export const PLAIN_YEAR_MONTH_PATTERN = "^\\d{4}-(0[1-9]|1[0-2])$";
+export const PLAIN_YEAR_MONTH_PATTERN: string = `^(${YEAR_PART}-${MONTH_PART}${OPTIONAL_CALENDAR_PART}|${DATE_PART}${CALENDAR_PART})$`;
 
 const validators = temporalValidators(PlainYearMonth);
 

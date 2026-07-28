@@ -131,6 +131,58 @@ describe("temporalJsonSchemaInterceptor", () => {
     const [, json] = converter.convert(plain, { strategy: "input" });
     expect(json).toMatchObject({ type: "string", examples: ["hello"] });
   });
+
+  // The four types above (Instant, PlainDate, PlainTime, Duration) left these
+  // unchecked against the real converter.
+
+  test("zZonedDateTime converts to a clean string schema", () => {
+    expect(convert(zZonedDateTime)).toEqual({
+      type: "string",
+      description:
+        "An ISO 8601 date-time string with timezone offset and IANA annotation (e.g. 2023-01-15T13:45:30+08:00[Asia/Manila])",
+      pattern: ZONED_DATE_TIME_PATTERN,
+    });
+  });
+
+  test("zPlainDateTime converts to a clean string schema", () => {
+    expect(convert(zPlainDateTime)).toEqual({
+      type: "string",
+      description:
+        "An ISO 8601 date-time string without timezone (e.g. 2023-01-15T13:45:30)",
+      pattern: PLAIN_DATE_TIME_PATTERN,
+    });
+  });
+
+  test("zPlainYearMonth converts to a clean string schema", () => {
+    expect(convert(zPlainYearMonth)).toEqual({
+      type: "string",
+      description: "An ISO 8601 year-month string (e.g. 2023-01)",
+      pattern: PLAIN_YEAR_MONTH_PATTERN,
+    });
+  });
+
+  test("zPlainMonthDay converts to a clean string schema", () => {
+    expect(convert(zPlainMonthDay)).toEqual({
+      type: "string",
+      description: "An ISO 8601 month-day string (e.g. --01-15 or 01-15)",
+      pattern: PLAIN_MONTH_DAY_PATTERN,
+    });
+  });
+
+  test("the four remaining instance variants convert too", () => {
+    for (const schema of [
+      zZonedDateTimeInstance,
+      zPlainDateTimeInstance,
+      zPlainYearMonthInstance,
+      zPlainMonthDayInstance,
+    ]) {
+      const json = convert(schema);
+
+      expect(json.type).toBe("string");
+      expect(json).not.toHaveProperty("anyOf");
+      expect(json).not.toHaveProperty("id");
+    }
+  });
 });
 
 /**
@@ -326,21 +378,15 @@ describe("ZonedDateTime string annotations", () => {
 });
 
 /**
- * Characterization tests, not endorsements.
- *
- * The validators parse via `Temporal.X.from()`, which accepts the `[u-ca=…]`
- * annotation that `toJSON()` emits for a non-ISO calendar. The exported
- * patterns do not, so the JSON Schema the interceptor publishes is narrower
- * than what the server emits and the client accepts. Anything enforcing the
- * advertised contract — generated clients, an API gateway, ajv over the
- * OpenAPI document — would reject values that work end to end.
- *
- * These patterns predate oRPC support and are unchanged by it; the mismatch is
- * recorded here because this is where the patterns become a published contract.
- * Should the patterns be widened, these expectations flip to `true` and this
- * block should be deleted.
+ * A non-ISO calendar makes `toJSON()` append a `[u-ca=…]` annotation, and makes
+ * `PlainYearMonth` / `PlainMonthDay` serialize as a full reference date instead
+ * of `YYYY-MM` / `MM-DD`. The validators have always parsed those strings, since
+ * they defer to `Temporal.X.from()`; the published patterns did not, so the
+ * advertised contract was narrower than what the server emits. Anything
+ * enforcing it — a generated client, an API gateway, ajv over the OpenAPI
+ * document — would have rejected values that work end to end.
  */
-describe("known limitation: patterns reject non-ISO calendar annotations", () => {
+describe("non-ISO calendars round-trip through the published contract", () => {
   // PlainYearMonth and PlainMonthDay have no `withCalendar`, so each value is
   // derived from a PlainDate that already carries the calendar.
   const hebrewDate = zoned.toPlainDate().withCalendar("hebrew");
@@ -364,44 +410,85 @@ describe("known limitation: patterns reject non-ISO calendar annotations", () =>
       PLAIN_MONTH_DAY_PATTERN,
       hebrewDate.toPlainMonthDay(),
     ],
+    [
+      "ZonedDateTime",
+      zZonedDateTime,
+      ZONED_DATE_TIME_PATTERN,
+      zoned.withCalendar("hebrew"),
+    ],
   ];
 
   for (const [name, schema, pattern, value] of withHebrew) {
-    test(`${name} parses a hebrew-calendar string the pattern rejects`, () => {
+    test(`${name} emits, advertises and revives a hebrew-calendar string`, () => {
       const wire = value.toJSON();
       expect(wire).toContain("[u-ca=hebrew]");
 
-      // Parsing works end to end...
+      // The advertised pattern accepts what the server emits...
+      expect(new RegExp(pattern, "u").test(wire)).toBe(true);
+
+      // ...and the client revives it losslessly.
       const revived = schema.parse(wire) as {
         toJSON: () => string;
         calendarId: string;
       };
       expect(revived.calendarId).toBe("hebrew");
       expect(revived.toJSON()).toBe(wire);
-
-      // ...but the advertised pattern would reject the very same string.
-      expect(new RegExp(pattern, "u").test(wire)).toBe(false);
     });
   }
 
-  test("PlainDate rejects an extended (BCE) year it can still parse", () => {
-    const wire = Temporal.PlainDate.from("-000753-04-21").toJSON();
-
-    expect(zPlainDate.parse(wire).year).toBe(-753);
-    expect(new RegExp(PLAIN_DATE_PATTERN, "u").test(wire)).toBe(false);
+  test("PlainYearMonth and PlainMonthDay still reject a bare calendar date", () => {
+    // Their non-ISO form is a full date, but only with the annotation present —
+    // a plain `2023-01-15` must not pass as either type.
+    expect(new RegExp(PLAIN_YEAR_MONTH_PATTERN, "u").test("2023-01-15")).toBe(
+      false,
+    );
+    expect(new RegExp(PLAIN_MONTH_DAY_PATTERN, "u").test("2023-01-15")).toBe(
+      false,
+    );
   });
 
-  test("ZonedDateTime tolerates its calendar suffix only incidentally", () => {
-    // The pattern ends in `\[.+\]`, and `.+` greedily spans the second bracket
-    // group — so it matches, but only because the check is that loose. The
-    // same pattern accepts an obviously malformed annotation.
-    const wire = zoned.withCalendar("hebrew").toJSON();
+  test("PlainDate accepts an extended (BCE) year", () => {
+    const wire = Temporal.PlainDate.from("-000753-04-21").toJSON();
 
-    expect(new RegExp(ZONED_DATE_TIME_PATTERN, "u").test(wire)).toBe(true);
+    expect(new RegExp(PLAIN_DATE_PATTERN, "u").test(wire)).toBe(true);
+    expect(zPlainDate.parse(wire).year).toBe(-753);
+  });
+
+  test("ZonedDateTime no longer lets its time zone group swallow the rest", () => {
+    // The old pattern ended in `\[.+\]`, whose greedy `.+` spanned both bracket
+    // groups — matching the calendar suffix only by accident, and accepting
+    // malformed annotations along the way.
     expect(
       new RegExp(ZONED_DATE_TIME_PATTERN, "u").test(
         "2023-01-15T13:45:30+08:00[not a time zone!][]",
       ),
-    ).toBe(true);
+    ).toBe(false);
+    expect(
+      new RegExp(ZONED_DATE_TIME_PATTERN, "u").test(
+        "2023-01-15T13:45:30+08:00[Asia/Manila][u-ca=]",
+      ),
+    ).toBe(false);
+  });
+
+  test("every calendar Temporal supports survives the round trip", () => {
+    for (const calendar of [
+      "hebrew",
+      "japanese",
+      "islamic-umalqura",
+      "chinese",
+      "indian",
+      "persian",
+      "buddhist",
+      "coptic",
+      "ethiopic",
+      "roc",
+      "gregory",
+    ]) {
+      const date = zoned.toPlainDate().withCalendar(calendar);
+      const wire = date.toJSON();
+
+      expect(new RegExp(PLAIN_DATE_PATTERN, "u").test(wire)).toBe(true);
+      expect(zPlainDate.parse(wire).calendarId).toBe(calendar);
+    }
   });
 });
