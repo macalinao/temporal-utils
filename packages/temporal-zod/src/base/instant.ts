@@ -1,4 +1,4 @@
-import { Temporal } from "temporal-polyfill";
+import { Temporal } from "ponyfill-temporal";
 import * as z from "zod";
 import {
   DATE_PART,
@@ -22,7 +22,9 @@ export const Instant: typeof Temporal.Instant = Temporal.Instant;
  * so a `[u-ca=…]` suffix is recognized instead of being absorbed by the time
  * zone group.
  */
-export const INSTANT_PATTERN: string = `^${DATE_PART}T${TIME_PART}${OFFSET_PART}(${TIME_ZONE_PART})?${OPTIONAL_CALENDAR_PART}$`;
+export const INSTANT_PATTERN =
+  // oxlint-disable-next-line typescript/no-unnecessary-type-assertion -- tsc isolatedDeclarations (TS9010) requires it
+  `^${DATE_PART}T${TIME_PART}${OFFSET_PART}(${TIME_ZONE_PART})?${OPTIONAL_CALENDAR_PART}$` as string;
 
 const validators = temporalValidators(Instant, [
   z

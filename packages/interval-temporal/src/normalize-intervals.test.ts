@@ -1,6 +1,6 @@
 import type { Interval } from "./interval.js";
 import { describe, expect, test } from "bun:test";
-import { Temporal } from "temporal-polyfill";
+import { Temporal } from "ponyfill-temporal";
 import { normalizeIntervals } from "./normalize-intervals.js";
 
 const toPlainTimeIntervals = (

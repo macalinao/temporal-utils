@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
+import { Temporal } from "ponyfill-temporal";
 import { default as SuperJSON } from "superjson";
-import { Temporal } from "temporal-polyfill";
 import { registerSuperJSONTemporal } from "./register-super-json-temporal.js";
 
 describe("registerSuperJSONTemporal", () => {

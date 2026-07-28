@@ -1,6 +1,6 @@
 import type { z } from "zod";
 import type { ZodTemporal } from "./temporal-validator.js";
-import { Temporal } from "temporal-polyfill";
+import { Temporal } from "ponyfill-temporal";
 import {
   DATE_PART,
   OPTIONAL_CALENDAR_PART,
@@ -19,7 +19,9 @@ export const PlainDateTime: typeof Temporal.PlainDateTime =
  * Also accepts the trailing `[u-ca=…]` annotation that `toJSON()` emits under a
  * non-ISO calendar (e.g. `2023-01-15T13:45:30[u-ca=hebrew]`).
  */
-export const PLAIN_DATE_TIME_PATTERN: string = `^${DATE_PART}T${TIME_PART}${OPTIONAL_CALENDAR_PART}$`;
+export const PLAIN_DATE_TIME_PATTERN =
+  // oxlint-disable-next-line typescript/no-unnecessary-type-assertion -- tsc isolatedDeclarations (TS9010) requires it
+  `^${DATE_PART}T${TIME_PART}${OPTIONAL_CALENDAR_PART}$` as string;
 
 const validators = temporalValidators(PlainDateTime);
 

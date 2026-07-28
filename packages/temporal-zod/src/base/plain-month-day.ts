@@ -1,6 +1,6 @@
 import type { z } from "zod";
 import type { ZodTemporal } from "./temporal-validator.js";
-import { Temporal } from "temporal-polyfill";
+import { Temporal } from "ponyfill-temporal";
 import {
   CALENDAR_PART,
   DATE_PART,
@@ -22,7 +22,9 @@ export const PlainMonthDay: typeof Temporal.PlainMonthDay =
  * only with the calendar annotation present, so a bare `2023-01-15` is still
  * rejected.
  */
-export const PLAIN_MONTH_DAY_PATTERN: string = `^((--)?${MONTH_PART}-${DAY_PART}${OPTIONAL_CALENDAR_PART}|${DATE_PART}${CALENDAR_PART})$`;
+export const PLAIN_MONTH_DAY_PATTERN =
+  // oxlint-disable-next-line typescript/no-unnecessary-type-assertion -- tsc isolatedDeclarations (TS9010) requires it
+  `^((--)?${MONTH_PART}-${DAY_PART}${OPTIONAL_CALENDAR_PART}|${DATE_PART}${CALENDAR_PART})$` as string;
 
 const validators = temporalValidators(PlainMonthDay);
 

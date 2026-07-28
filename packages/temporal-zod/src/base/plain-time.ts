@@ -1,6 +1,6 @@
 import type { z } from "zod";
 import type { ZodTemporal } from "./temporal-validator.js";
-import { Temporal } from "temporal-polyfill";
+import { Temporal } from "ponyfill-temporal";
 import { TIME_PART } from "./iso-pattern-parts.js";
 import { temporalValidators } from "./temporal-validator.js";
 
@@ -15,7 +15,7 @@ export const PlainTime: typeof Temporal.PlainTime = Temporal.PlainTime;
  * `PlainTime` carries no calendar, so unlike the date-bearing types this takes
  * no `[u-ca=…]` annotation.
  */
-export const PLAIN_TIME_PATTERN: string = `^${TIME_PART}$`;
+export const PLAIN_TIME_PATTERN = `^${TIME_PART}$` as string;
 
 const validators = temporalValidators(PlainTime);
 

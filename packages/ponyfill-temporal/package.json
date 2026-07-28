@@ -1,10 +1,12 @@
 {
-  "name": "temporal-zod",
-  "version": "0.6.3",
-  "description": "Zod validators for Temporal types.",
+  "name": "ponyfill-temporal",
+  "version": "0.0.1",
+  "description": "Ponyfill for the TC39 Temporal API that conditionally loads temporal-polyfill only when native Temporal is unavailable.",
   "keywords": [
-    "temporal",
-    "zod"
+    "polyfill",
+    "ponyfill",
+    "tc39",
+    "temporal"
   ],
   "homepage": "https://github.com/macalinao/temporal-utils",
   "bugs": {
@@ -19,20 +21,13 @@
     "README.md"
   ],
   "type": "module",
-  "sideEffects": [
-    "./dist/json-schemas.js",
-    "./dist/index.js"
-  ],
+  "sideEffects": false,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    },
-    "./base": {
-      "types": "./dist/base/index.d.ts",
-      "import": "./dist/base/index.js"
+      "default": "./dist/index.js"
     }
   },
   "publishConfig": {
@@ -45,19 +40,13 @@
     "test": "bun test src/"
   },
   "dependencies": {
-    "ponyfill-temporal": "workspace:*",
+    "temporal-polyfill": "^1.0.1",
+    "temporal-spec": "^1.0.0",
     "tslib": "^2.8.1"
   },
   "devDependencies": {
     "@macalinao/tsconfig": "^3.2.5",
-    "@orpc/zod": "^1.14.0",
     "@types/bun": "latest",
-    "ajv": "^8.18.0",
-    "ajv-formats": "^3.0.1",
-    "typescript": "^5.9.2",
-    "zod": "^4.1.11"
-  },
-  "peerDependencies": {
-    "zod": "^4.0.0"
+    "typescript": "^5.8.2"
   }
 }

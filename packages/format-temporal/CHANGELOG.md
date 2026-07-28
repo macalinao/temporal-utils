@@ -1,5 +1,11 @@
 # format-temporal
 
+## 0.5.4
+
+### Patch Changes
+
+- ef50cd9: Republish to fix an issue with the previous release. No functional changes.
+
 ## 0.5.3
 
 ### Patch Changes

@@ -46,7 +46,7 @@ export const TIME_ZONE_PART = "\\[!?[A-Za-z0-9_+.:/-]+\\]";
 export const CALENDAR_PART = "\\[u-ca=[A-Za-z0-9]+(-[A-Za-z0-9]+)*\\]";
 
 /** {@link CALENDAR_PART}, optional. */
-export const OPTIONAL_CALENDAR_PART: string = `(${CALENDAR_PART})?`;
+export const OPTIONAL_CALENDAR_PART = `(${CALENDAR_PART})?` as string;
 
 /** Calendar date, `YYYY-MM-DD`. */
-export const DATE_PART: string = `${YEAR_PART}-${MONTH_PART}-${DAY_PART}`;
+export const DATE_PART = `${YEAR_PART}-${MONTH_PART}-${DAY_PART}` as string;

@@ -1,7 +1,7 @@
 import type { ZodToJsonSchemaConverterOptions } from "@orpc/zod/zod4";
 import { describe, expect, test } from "bun:test";
 import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
-import { Temporal } from "temporal-polyfill";
+import { Temporal } from "ponyfill-temporal";
 import * as z from "zod";
 import {
   DURATION_PATTERN,

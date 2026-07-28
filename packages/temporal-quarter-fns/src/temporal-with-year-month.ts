@@ -1,4 +1,4 @@
-import type { Temporal } from "temporal-polyfill";
+import type { Temporal } from "ponyfill-temporal";
 
 /**
  * Temporal types that have both a year and a month.
