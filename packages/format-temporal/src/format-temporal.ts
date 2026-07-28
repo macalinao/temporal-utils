@@ -1,4 +1,3 @@
-// biome-ignore lint/suspicious/noShadowRestrictedNames: Temporal spec Intl
 import type { Intl, Temporal } from "temporal-spec";
 
 /**
