@@ -1,6 +1,6 @@
 {
   "name": "temporal-quarter-fns",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "description": "Functions for working with quarters in Temporal.",
   "keywords": [
     "quarter",

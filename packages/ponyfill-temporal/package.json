@@ -1,6 +1,6 @@
 {
   "name": "ponyfill-temporal",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Ponyfill for the TC39 Temporal API that conditionally loads temporal-polyfill only when native Temporal is unavailable.",
   "keywords": [
     "polyfill",

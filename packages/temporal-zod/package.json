@@ -1,6 +1,6 @@
 {
   "name": "temporal-zod",
-  "version": "0.6.3",
+  "version": "0.7.0",
   "description": "Zod validators for Temporal types.",
   "keywords": [
     "temporal",
