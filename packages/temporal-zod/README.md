@@ -98,10 +98,27 @@ const generator = new OpenAPIGenerator({
 interceptor is typed structurally, so if you don't use oRPC you pay nothing and
 nothing needs to resolve.
 
-The interceptor is driven by each validator's metadata rather than by a
-per-type list, so all eight Temporal types are covered — `Instant`,
-`ZonedDateTime`, `PlainDate`, `PlainTime`, `PlainDateTime`, `PlainYearMonth`,
-`PlainMonthDay`, and `Duration` — in both the coercing and `*Instance` variants.
+The interceptor is driven by a registry rather than by a per-type list, so all
+eight Temporal types are covered — `Instant`, `ZonedDateTime`, `PlainDate`,
+`PlainTime`, `PlainDateTime`, `PlainYearMonth`, `PlainMonthDay`, and `Duration`
+— in both the coercing and `*Instance` variants.
+
+It only rewrites schemas that `temporal-zod` itself created. Every validator is
+registered in `temporalRegistry`, a Zod registry scoped to this package, and the
+interceptor consults that rather than `z.globalRegistry`. Your own schemas are
+left entirely to oRPC — including ones you annotate the same way we do, such as
+`z.string().min(5).meta({ type: "string", format: "email" })`, which keeps the
+`minLength` oRPC derives from its checks.
+
+`temporalRegistry` is exported, so you can use it to recognize Temporal
+validators in your own schema walks:
+
+```typescript
+import { temporalRegistry, zInstant } from "temporal-zod";
+
+temporalRegistry.has(zInstant); // true
+temporalRegistry.get(zInstant); // { type: "string", format: "date-time", … }
+```
 
 Values travel as the plain ISO strings `toJSON()` produces, and the validator on
 the receiving end revives them. The published `pattern` accepts everything

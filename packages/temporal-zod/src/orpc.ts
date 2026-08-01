@@ -8,7 +8,9 @@
  * hood, so oRPC emits a messy `anyOf` and drops the `format`/`pattern` metadata.
  *
  * This module fixes that with a single {@link temporalJsonSchemaInterceptor}
- * you pass to the converter:
+ * you pass to the converter. It rewrites only the schemas in
+ * {@link temporalRegistry} — this package's own validators — and leaves every
+ * other node in your schema tree to oRPC:
  *
  * @example
  * ```typescript
@@ -36,18 +38,8 @@
  * @module
  * @see {@link https://github.com/macalinao/temporal-utils/tree/master/packages/temporal-zod | temporal-zod on GitHub}
  */
-import * as z from "zod";
-
-/**
- * The JSON Schema a Temporal validator converts to. Every `temporal-zod`
- * validator is an ISO 8601 string, optionally with a `format` and a `pattern`.
- */
-export interface TemporalJsonSchema {
-  type: "string";
-  description?: string;
-  format?: string;
-  pattern?: string;
-}
+import type * as z from "zod";
+import { type TemporalJsonSchema, temporalRegistry } from "./registry.js";
 
 /**
  * The subset of oRPC's interceptor context that {@link temporalJsonSchemaInterceptor}
@@ -78,18 +70,19 @@ export type TemporalSchemaInterceptor = <
  * oRPC's `interceptors` are onion-middleware around every node's conversion: an
  * interceptor may short-circuit by returning its own `[required, jsonSchema]`
  * instead of calling `next()`, fully replacing the structural conversion (so no
- * leftover `anyOf` from the underlying `z.union`). For any schema whose
- * global-registry metadata carries a JSON Schema `type` — which every
- * `temporal-zod` validator populates — we return that metadata directly, so
+ * leftover `anyOf` from the underlying `z.union`). For a schema in
+ * {@link temporalRegistry} we return its registered JSON Schema directly, so
  * `zInstant` → `{ type: "string", format: "date-time", pattern, … }`. This is
  * general over every Temporal type (`zPlainDate` → `date`, `zDuration` →
  * `duration`, …).
  *
- * Schemas without a `type` in their metadata (e.g. a consumer's own
- * `.meta({ examples })` / `.meta({ id })`) fall through to `next()` untouched,
- * so oRPC's `$ref` dedup and example rendering are unaffected. The registry `id`
- * is dropped: we inline the schema rather than emit a `$ref` to a `$def` the
- * converter never registers.
+ * The lookup is scoped to `temporal-zod`'s own registry rather than
+ * `z.globalRegistry`. The global registry is shared with the whole application,
+ * so matching on the shape of its metadata would also short-circuit a
+ * consumer's own `.meta({ type: "string", format: "email" })` — replacing its
+ * structural conversion and silently dropping the constraints oRPC derives from
+ * the schema's checks. Every other schema, annotated or not, falls through to
+ * `next()` untouched, leaving oRPC's `$ref` dedup and example rendering alone.
  *
  * @example
  * ```typescript
@@ -101,12 +94,11 @@ export type TemporalSchemaInterceptor = <
 export const temporalJsonSchemaInterceptor: TemporalSchemaInterceptor = (
   options,
 ) => {
-  const meta = z.globalRegistry.get(options.schema) as
-    | (Record<string, unknown> & { type?: unknown })
-    | undefined;
-  if (meta && typeof meta.type === "string") {
-    const { id: _id, ...jsonSchema } = meta;
-    return [true, jsonSchema as unknown as TemporalJsonSchema];
+  const jsonSchema = temporalRegistry.get(options.schema);
+  if (jsonSchema) {
+    // Copy so a consumer mutating the emitted document can't corrupt the
+    // registry entry shared by every conversion.
+    return [true, { ...jsonSchema }];
   }
   return options.next();
 };

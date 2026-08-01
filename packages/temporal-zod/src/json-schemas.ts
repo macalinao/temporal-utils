@@ -39,17 +39,13 @@ import {
   zZonedDateTime as zZonedDateTimeBase,
   zZonedDateTimeInstance as zZonedDateTimeInstanceBase,
 } from "./base/index.js";
+import { type TemporalJsonSchema, temporalRegistry } from "./registry.js";
 
 /**
- * Shape of the JSON Schema metadata attached to each Temporal validator.
+ * Shape of the JSON Schema metadata attached to each Temporal validator: the
+ * schema itself plus the registry `id` used for `$defs`/`$ref` dedup.
  */
-interface TemporalJSONSchema {
-  type: "string";
-  id: string;
-  description: string;
-  pattern?: string;
-  format?: string;
-}
+type TemporalJSONSchema = TemporalJsonSchema & { id: string };
 
 /**
  * Applies JSON schema metadata to Zod schemas so `z.toJSONSchema()` works.
@@ -57,6 +53,10 @@ interface TemporalJSONSchema {
  * Uses `.meta()` to clone each schema and register metadata in the global
  * registry. The metadata (description, pattern, format) is `Object.assign`ed
  * into the JSON Schema output by Zod's `toJSONSchema()`.
+ *
+ * Each clone is also added to {@link temporalRegistry}, so consumers walking a
+ * schema tree can recognize a Temporal validator by identity rather than by
+ * guessing from its global-registry metadata.
  *
  * Sets `_zod.toJSONSchema` on every clone to prevent "unrepresentable type"
  * errors for instanceof/transform schemas. Only the first schema (coerce)
@@ -78,6 +78,10 @@ function registerJSONSchema<T extends [z.ZodType, ...z.ZodType[]]>(
     // Clear parent ref set by clone() — the original schema won't be in the
     // toJSONSchema seen map, which causes flattenRef to crash.
     cloned._zod.parent = undefined;
+    // The id is deliberately left out: it identifies the registry entry, not
+    // the type, and inlining it would emit a $ref to a $def that a consumer's
+    // own converter never registered.
+    temporalRegistry.add(cloned, metaWithoutId);
     return cloned;
   }) as unknown as T;
 }

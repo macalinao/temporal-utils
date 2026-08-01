@@ -11,6 +11,14 @@ oRPC would otherwise produce.
 The interceptor is typed structurally, so consumers who don't use oRPC pay
 nothing and nothing needs to resolve at typecheck time.
 
+Also export `temporalRegistry`, a Zod registry scoped to this package that holds
+every validator `temporal-zod` creates along with its JSON Schema. The
+interceptor consults it rather than `z.globalRegistry`, so it rewrites only our
+own types and leaves your schemas — including ones you annotate the same way,
+such as `z.string().min(5).meta({ type: "string", format: "email" })` — entirely
+to oRPC. Use it to recognize Temporal validators in your own schema walks:
+`temporalRegistry.has(zInstant)`.
+
 Widen the exported `*_PATTERN` regexes to accept everything `toJSON()` can emit,
 which matters now that they are published as an OpenAPI contract. They previously
 rejected strings the validators themselves parse:

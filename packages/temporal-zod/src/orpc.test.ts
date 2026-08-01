@@ -29,7 +29,9 @@ import {
   zZonedDateTime,
   zZonedDateTimeInstance,
 } from "./json-schemas.js";
+import { zInstant as zInstantBase } from "./base/index.js";
 import { temporalJsonSchemaInterceptor } from "./orpc.js";
+import { temporalRegistry } from "./registry.js";
 
 const converter = new ZodToJsonSchemaConverter({
   interceptors: [temporalJsonSchemaInterceptor],
@@ -132,6 +134,14 @@ describe("temporalJsonSchemaInterceptor", () => {
     expect(json).toMatchObject({ type: "string", examples: ["hello"] });
   });
 
+  test("does not touch a base validator, which carries no metadata", () => {
+    const [, json] = converter.convert(zInstantBase, { strategy: "input" });
+    // Same output as the bare converter: the interceptor declined to act.
+    expect(json).toEqual(
+      bareConverter.convert(zInstantBase, { strategy: "input" })[1],
+    );
+  });
+
   // The four types above (Instant, PlainDate, PlainTime, Duration) left these
   // unchecked against the real converter.
 
@@ -186,7 +196,7 @@ describe("temporalJsonSchemaInterceptor", () => {
 });
 
 /**
- * The interceptor is metadata-driven rather than per-type, so it should cover
+ * The interceptor is registry-driven rather than per-type, so it should cover
  * every Temporal type rather than just the handful spot-checked above. These
  * cases pin that down for all eight, in both the coercing and instance
  * variants, and check the wire round trip each type actually goes through:
@@ -342,6 +352,91 @@ describe("temporalJsonSchemaInterceptor covers every Temporal type", () => {
     for (const { name, pattern } of ALL_TEMPORAL_TYPES) {
       expect(properties[name]).toMatchObject({ type: "string", pattern });
     }
+  });
+});
+
+/**
+ * The interceptor keys off `temporalRegistry` — this package's own schemas —
+ * rather than off the shape of a schema's `z.globalRegistry` metadata. The
+ * global registry is shared with the entire application, so a shape test would
+ * also match a consumer's own annotations and short-circuit their conversion,
+ * throwing away everything oRPC derives from the schema's checks.
+ */
+describe("the interceptor only acts on temporal-zod's own schemas", () => {
+  test("the registry holds every exported validator and nothing else", () => {
+    for (const { coerce, instance } of ALL_TEMPORAL_TYPES) {
+      expect(temporalRegistry.has(coerce)).toBe(true);
+      expect(temporalRegistry.has(instance)).toBe(true);
+    }
+
+    // The metadata-free `temporal-zod/base` variants are not members.
+    expect(temporalRegistry.has(zInstantBase)).toBe(false);
+    expect(temporalRegistry.has(z.string())).toBe(false);
+  });
+
+  test("registry entries carry no id, so nothing emits a dangling $ref", () => {
+    for (const { coerce, instance, pattern, format } of ALL_TEMPORAL_TYPES) {
+      for (const schema of [coerce, instance]) {
+        const entry = temporalRegistry.get(schema);
+
+        expect(entry).toMatchObject({ type: "string", pattern });
+        expect(entry).not.toHaveProperty("id");
+        expect(entry?.format).toBe(format);
+      }
+    }
+  });
+
+  test("a consumer's own JSON-Schema-shaped meta is left to oRPC", () => {
+    // Shaped exactly like ours — `type: "string"` plus format/pattern — but not
+    // ours. Matching on metadata shape would replace this whole conversion and
+    // drop the minLength/maxLength oRPC derives from the checks.
+    const email = z
+      .string()
+      .min(5)
+      .max(100)
+      .meta({ type: "string", format: "email", pattern: "^.+@.+$" });
+
+    const [, json] = converter.convert(email, { strategy: "input" });
+
+    expect(json).toMatchObject({ minLength: 5, maxLength: 100 });
+    // Identical to what oRPC produces on its own — the interceptor stood aside.
+    expect(json).toEqual(
+      bareConverter.convert(email, { strategy: "input" })[1],
+    );
+  });
+
+  test("a consumer's id-bearing meta still gets oRPC's $ref treatment", () => {
+    const userId = z.string().uuid().meta({ id: "UserId", type: "string" });
+    const [, json] = converter.convert(z.object({ a: userId, b: userId }), {
+      strategy: "input",
+    });
+
+    expect(json).toEqual(
+      bareConverter.convert(z.object({ a: userId, b: userId }), {
+        strategy: "input",
+      })[1],
+    );
+  });
+
+  test("removing a schema from the registry disables the rewrite for it", () => {
+    // Proves the registry is the thing being consulted, not the global one:
+    // the `.meta()` registration is untouched, yet the rewrite stops.
+    const scratch = z.string().meta({ type: "string", format: "date-time" });
+    temporalRegistry.add(scratch, { type: "string", description: "scratch" });
+
+    expect(convert(scratch)).toEqual({
+      type: "string",
+      description: "scratch",
+    });
+
+    temporalRegistry.remove(scratch);
+
+    expect(convert(scratch)).toEqual(
+      bareConverter.convert(scratch, { strategy: "input" })[1] as Record<
+        string,
+        unknown
+      >,
+    );
   });
 });
 

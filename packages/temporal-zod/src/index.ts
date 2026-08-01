@@ -26,3 +26,4 @@
  */
 export * from "./json-schemas.js";
 export * from "./orpc.js";
+export * from "./registry.js";
