@@ -1,6 +1,6 @@
 {
   "name": "temporal-zod",
-  "version": "0.6.3",
+  "version": "0.7.0",
   "description": "Zod validators for Temporal types.",
   "keywords": [
     "temporal",
@@ -45,6 +45,7 @@
     "test": "bun test src/"
   },
   "dependencies": {
+    "ponyfill-temporal": "workspace:*",
     "tslib": "catalog:"
   },
   "devDependencies": {
@@ -52,12 +53,10 @@
     "@types/bun": "catalog:",
     "ajv": "^8.18.0",
     "ajv-formats": "^3.0.1",
-    "temporal-polyfill": "catalog:",
     "typescript": "catalog:",
     "zod": "^4.1.11"
   },
   "peerDependencies": {
-    "temporal-polyfill": "^0.3.0",
     "zod": "^4.0.0"
   }
 }

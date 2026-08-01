@@ -1,4 +1,4 @@
-import { Temporal } from "temporal-polyfill";
+import { Temporal } from "ponyfill-temporal";
 import { parseMonthLike } from "./parse-month-like.js";
 import { parseYearLike } from "./parse-year-like.js";
 import { tokenizeAlphanumeric } from "./utils/tokenize-alphanumeric.js";

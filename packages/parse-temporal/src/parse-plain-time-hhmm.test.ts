@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { Temporal } from "temporal-polyfill";
+import { Temporal } from "ponyfill-temporal";
 import { parsePlainTimeHHMM } from "./parse-plain-time-hhmm.js";
 
 describe("parsePlainTimeHHMM", () => {

@@ -1,6 +1,6 @@
 {
   "name": "superjson-temporal",
-  "version": "0.5.3",
+  "version": "0.6.0",
   "description": "SuperJSON serializers/deserializers for Temporal types.",
   "keywords": [
     "superjson",
@@ -38,17 +38,16 @@
     "test": "bun test src/"
   },
   "dependencies": {
+    "ponyfill-temporal": "workspace:*",
     "tslib": "catalog:"
   },
   "devDependencies": {
     "@macalinao/tsconfig": "catalog:",
     "@types/bun": "catalog:",
     "superjson": "^2.2.2",
-    "temporal-polyfill": "catalog:",
     "typescript": "catalog:"
   },
   "peerDependencies": {
-    "superjson": "^2.2.2",
-    "temporal-polyfill": "^0.2 || ^0.3"
+    "superjson": "^2.2.2"
   }
 }

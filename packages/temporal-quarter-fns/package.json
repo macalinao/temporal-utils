@@ -1,6 +1,6 @@
 {
   "name": "temporal-quarter-fns",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "description": "Functions for working with quarters in Temporal.",
   "keywords": [
     "quarter",
@@ -38,16 +38,12 @@
     "test": "bun test src/"
   },
   "dependencies": {
+    "ponyfill-temporal": "workspace:*",
     "tslib": "catalog:"
   },
   "devDependencies": {
     "@macalinao/tsconfig": "catalog:",
     "@types/bun": "catalog:",
-    "temporal-polyfill": "catalog:",
-    "temporal-spec": "catalog:",
     "typescript": "catalog:"
-  },
-  "peerDependencies": {
-    "temporal-spec": "^0.3.0"
   }
 }

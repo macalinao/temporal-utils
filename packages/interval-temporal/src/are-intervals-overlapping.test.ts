@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { Temporal } from "temporal-polyfill";
+import { Temporal } from "ponyfill-temporal";
 import { areIntervalsOverlapping } from "./are-intervals-overlapping.js";
 
 describe("areIntervalsOverlapping", () => {

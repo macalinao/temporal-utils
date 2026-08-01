@@ -1,4 +1,4 @@
-import { Temporal } from "temporal-polyfill";
+import { Temporal } from "ponyfill-temporal";
 import { parsePlainDate } from "./parse-plain-date.js";
 
 const WHITESPACE_RE = /\s+/;

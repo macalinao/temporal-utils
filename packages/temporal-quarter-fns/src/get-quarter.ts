@@ -2,7 +2,7 @@
  * The {@link getQuarter} function options.
  */
 
-import type { Temporal } from "temporal-spec";
+import type { Temporal } from "ponyfill-temporal";
 
 /**
  * A quarter of a year, one-indexed.

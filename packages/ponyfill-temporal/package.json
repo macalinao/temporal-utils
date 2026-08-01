@@ -1,9 +1,11 @@
 {
-  "name": "interval-temporal",
-  "version": "0.6.0",
-  "description": "An interval type for Temporal. Also contains helpers for comparing and sorting Temporal objects.",
+  "name": "ponyfill-temporal",
+  "version": "0.1.0",
+  "description": "Ponyfill for the TC39 Temporal API that conditionally loads temporal-polyfill only when native Temporal is unavailable.",
   "keywords": [
-    "interval",
+    "polyfill",
+    "ponyfill",
+    "tc39",
     "temporal"
   ],
   "homepage": "https://github.com/macalinao/temporal-utils",
@@ -38,7 +40,8 @@
     "test": "bun test src/"
   },
   "dependencies": {
-    "ponyfill-temporal": "workspace:*",
+    "temporal-polyfill": "catalog:",
+    "temporal-spec": "catalog:",
     "tslib": "catalog:"
   },
   "devDependencies": {
