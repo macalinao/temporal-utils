@@ -39,13 +39,13 @@
   },
   "dependencies": {
     "ponyfill-temporal": "workspace:*",
-    "tslib": "^2.8.1"
+    "tslib": "catalog:"
   },
   "devDependencies": {
-    "@macalinao/tsconfig": "^3.2.5",
-    "@types/bun": "latest",
+    "@macalinao/tsconfig": "catalog:",
+    "@types/bun": "catalog:",
     "superjson": "^2.2.2",
-    "typescript": "^5.8.2"
+    "typescript": "catalog:"
   },
   "peerDependencies": {
     "superjson": "^2.2.2"

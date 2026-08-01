@@ -40,13 +40,13 @@
     "test": "bun test src/"
   },
   "dependencies": {
-    "temporal-polyfill": "^1.0.1",
-    "temporal-spec": "^1.0.0",
-    "tslib": "^2.8.1"
+    "temporal-polyfill": "catalog:",
+    "temporal-spec": "catalog:",
+    "tslib": "catalog:"
   },
   "devDependencies": {
-    "@macalinao/tsconfig": "^3.2.5",
-    "@types/bun": "latest",
-    "typescript": "^5.8.2"
+    "@macalinao/tsconfig": "catalog:",
+    "@types/bun": "catalog:",
+    "typescript": "catalog:"
   }
 }
