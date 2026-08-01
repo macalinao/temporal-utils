@@ -1,6 +1,6 @@
 {
   "name": "format-temporal",
-  "version": "0.5.4",
+  "version": "0.6.0",
   "description": "Format Temporal objects as localized strings.",
   "keywords": [
     "format",

@@ -1,6 +1,6 @@
 {
   "name": "superjson-temporal",
-  "version": "0.5.3",
+  "version": "0.6.0",
   "description": "SuperJSON serializers/deserializers for Temporal types.",
   "keywords": [
     "superjson",
