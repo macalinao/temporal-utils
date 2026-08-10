@@ -321,6 +321,64 @@ describe("PlainDate format vs. calendar annotation", () => {
   });
 });
 
+/**
+ * The published patterns are a contract: whatever `toJSON()` emits has to match
+ * one, and parsing that string back has to reproduce it byte for byte. The cases
+ * above check that per type; these check the two axes where the string carries
+ * information beyond the date itself — the calendar and the UTC offset.
+ */
+describe("annotated strings survive the pattern and the round trip", () => {
+  const zoned = Temporal.ZonedDateTime.from(
+    "2023-01-15T13:45:30+08:00[Asia/Manila]",
+  );
+
+  test("every calendar Temporal supports round-trips as a PlainDate", () => {
+    for (const calendar of [
+      "hebrew",
+      "japanese",
+      "islamic-umalqura",
+      "chinese",
+      "indian",
+      "persian",
+      "buddhist",
+      "coptic",
+      "ethiopic",
+      "roc",
+      "gregory",
+    ]) {
+      const wire = zoned.toPlainDate().withCalendar(calendar).toJSON();
+
+      expect(new RegExp(PLAIN_DATE_PATTERN, "u").test(wire)).toBe(true);
+      expect(zPlainDate.parse(wire).calendarId).toBe(calendar);
+    }
+  });
+
+  test("the bracketed IANA time zone and calendar both survive", () => {
+    const revived = zZonedDateTime.parse(zoned.withCalendar("hebrew").toJSON());
+
+    expect(revived.timeZoneId).toBe("Asia/Manila");
+    expect(revived.calendarId).toBe("hebrew");
+  });
+
+  test("the offset disambiguates a DST fall-back instant", () => {
+    // 01:30 happens twice on this date in New York; only the offset in the
+    // string says which one, so dropping it would silently shift the instant.
+    const ambiguous = Temporal.ZonedDateTime.from(
+      "2023-11-05T01:30:00-05:00[America/New_York]",
+    );
+    const revived = zZonedDateTime.parse(ambiguous.toJSON());
+
+    expect(revived.epochNanoseconds).toBe(ambiguous.epochNanoseconds);
+  });
+
+  test("an extended (BCE) year parses back to a negative year", () => {
+    const wire = Temporal.PlainDate.from("-000753-04-21").toJSON();
+
+    expect(new RegExp(PLAIN_DATE_PATTERN, "u").test(wire)).toBe(true);
+    expect(zPlainDate.parse(wire).year).toBe(-753);
+  });
+});
+
 describe("full JSON Schema snapshot for all types", () => {
   const allTypes = z.object({
     instant: zInstant,

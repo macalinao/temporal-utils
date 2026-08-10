@@ -49,9 +49,9 @@ export interface TemporalJsonSchema {
  * variants from `temporal-zod/base` are not, since they carry no JSON Schema.
  *
  * Use this to recognize Temporal validators inside a schema walk — that is what
- * {@link temporalJsonSchemaInterceptor} does for oRPC — instead of pattern
- * matching on `z.globalRegistry` metadata, which cannot tell our schemas apart
- * from a consumer's.
+ * the `temporal-orpc` package does to fix oRPC's OpenAPI output — instead of
+ * pattern matching on `z.globalRegistry` metadata, which cannot tell our schemas
+ * apart from a consumer's.
  */
 export const temporalRegistry: z.core.$ZodRegistry<TemporalJsonSchema> =
   z.registry<TemporalJsonSchema>();

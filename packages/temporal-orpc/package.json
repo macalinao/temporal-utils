@@ -1,8 +1,10 @@
 {
-  "name": "temporal-zod",
-  "version": "0.7.0",
-  "description": "Zod validators for Temporal types.",
+  "name": "temporal-orpc",
+  "version": "0.0.1",
+  "description": "oRPC support for Temporal types via temporal-zod.",
   "keywords": [
+    "openapi",
+    "orpc",
     "temporal",
     "zod"
   ],
@@ -19,20 +21,13 @@
     "README.md"
   ],
   "type": "module",
-  "sideEffects": [
-    "./dist/json-schemas.js",
-    "./dist/index.js"
-  ],
+  "sideEffects": false,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    },
-    "./base": {
-      "types": "./dist/base/index.d.ts",
-      "import": "./dist/base/index.js"
+      "default": "./dist/index.js"
     }
   },
   "publishConfig": {
@@ -45,18 +40,20 @@
     "test": "bun test src/"
   },
   "dependencies": {
-    "ponyfill-temporal": "workspace:*",
     "tslib": "catalog:"
   },
   "devDependencies": {
     "@macalinao/tsconfig": "catalog:",
+    "@orpc/zod": "^1.14.0",
     "@types/bun": "catalog:",
-    "ajv": "^8.18.0",
-    "ajv-formats": "^3.0.1",
+    "ponyfill-temporal": "workspace:*",
+    "temporal-zod": "workspace:*",
     "typescript": "catalog:",
     "zod": "^4.1.11"
   },
   "peerDependencies": {
+    "@orpc/zod": "^1.14.0",
+    "temporal-zod": "^0.7.0",
     "zod": "^4.0.0"
   }
 }

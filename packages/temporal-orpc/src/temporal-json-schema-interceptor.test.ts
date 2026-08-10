@@ -1,8 +1,6 @@
-import type { ZodToJsonSchemaConverterOptions } from "@orpc/zod/zod4";
 import { describe, expect, test } from "bun:test";
 import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
 import { Temporal } from "ponyfill-temporal";
-import * as z from "zod";
 import {
   DURATION_PATTERN,
   INSTANT_PATTERN,
@@ -11,6 +9,7 @@ import {
   PLAIN_MONTH_DAY_PATTERN,
   PLAIN_TIME_PATTERN,
   PLAIN_YEAR_MONTH_PATTERN,
+  temporalRegistry,
   ZONED_DATE_TIME_PATTERN,
   zDuration,
   zDurationInstance,
@@ -28,10 +27,10 @@ import {
   zPlainYearMonthInstance,
   zZonedDateTime,
   zZonedDateTimeInstance,
-} from "./json-schemas.js";
-import { zInstant as zInstantBase } from "./base/index.js";
-import { temporalJsonSchemaInterceptor } from "./orpc.js";
-import { temporalRegistry } from "./registry.js";
+} from "temporal-zod";
+import { zInstant as zInstantBase } from "temporal-zod/base";
+import * as z from "zod";
+import { temporalJsonSchemaInterceptor } from "./temporal-json-schema-interceptor.js";
 
 const converter = new ZodToJsonSchemaConverter({
   interceptors: [temporalJsonSchemaInterceptor],
@@ -45,20 +44,6 @@ function convert(schema: z.ZodType): Record<string, unknown> {
 }
 
 describe("temporalJsonSchemaInterceptor", () => {
-  /**
-   * `orpc.ts` types the interceptor structurally so `temporal-zod` imports
-   * nothing from `@orpc/*` — even an `import type` would have to resolve in the
-   * shipped `.d.ts`, breaking consumers without `@orpc/zod` who don't set
-   * `skipLibCheck`. This assignment is what keeps the structural type honest:
-   * it fails to compile if oRPC's real interceptor signature ever drifts.
-   */
-  test("structural type is assignable to oRPC's interceptor signature", () => {
-    const asOrpcInterceptor: NonNullable<
-      ZodToJsonSchemaConverterOptions["interceptors"]
-    >[number] = temporalJsonSchemaInterceptor;
-    expect(asOrpcInterceptor).toBe(temporalJsonSchemaInterceptor);
-  });
-
   test("zInstant converts to a clean string schema with format + pattern", () => {
     expect(convert(zInstant)).toEqual({
       type: "string",
@@ -353,10 +338,39 @@ describe("temporalJsonSchemaInterceptor covers every Temporal type", () => {
       expect(properties[name]).toMatchObject({ type: "string", pattern });
     }
   });
+
+  test("a non-ISO calendar round-trips through the advertised contract", () => {
+    // `toJSON()` appends a `[u-ca=…]` annotation under a non-ISO calendar, and
+    // PlainYearMonth/PlainMonthDay serialize as a full reference date. The
+    // emitted `pattern` has to accept what the server actually sends.
+    const hebrewDate = zoned.toPlainDate().withCalendar("hebrew");
+    const cases: [z.ZodType, { toJSON: () => string }][] = [
+      [zPlainDate, hebrewDate],
+      [zPlainDateTime, zoned.toPlainDateTime().withCalendar("hebrew")],
+      [zPlainYearMonth, hebrewDate.toPlainYearMonth()],
+      [zPlainMonthDay, hebrewDate.toPlainMonthDay()],
+      [zZonedDateTime, zoned.withCalendar("hebrew")],
+    ];
+
+    for (const [schema, value] of cases) {
+      const wire = value.toJSON();
+      expect(wire).toContain("[u-ca=hebrew]");
+
+      const { pattern } = convert(schema);
+      expect(new RegExp(pattern as string, "u").test(wire)).toBe(true);
+
+      const revived = schema.parse(wire) as {
+        toJSON: () => string;
+        calendarId: string;
+      };
+      expect(revived.calendarId).toBe("hebrew");
+      expect(revived.toJSON()).toBe(wire);
+    }
+  });
 });
 
 /**
- * The interceptor keys off `temporalRegistry` — this package's own schemas —
+ * The interceptor keys off `temporalRegistry` — `temporal-zod`'s own schemas —
  * rather than off the shape of a schema's `z.globalRegistry` metadata. The
  * global registry is shared with the entire application, so a shape test would
  * also match a consumer's own annotations and short-circuit their conversion,
@@ -437,153 +451,5 @@ describe("the interceptor only acts on temporal-zod's own schemas", () => {
         unknown
       >,
     );
-  });
-});
-
-describe("ZonedDateTime string annotations", () => {
-  test("the bracketed IANA time zone survives the round trip", () => {
-    const wire = zoned.toJSON();
-
-    expect(wire).toBe("2023-01-15T13:45:30+08:00[Asia/Manila]");
-    expect(new RegExp(ZONED_DATE_TIME_PATTERN, "u").test(wire)).toBe(true);
-
-    const revived = zZonedDateTime.parse(wire);
-    expect(revived.timeZoneId).toBe("Asia/Manila");
-    expect(revived.equals(zoned)).toBe(true);
-  });
-
-  test("a non-ISO calendar annotation survives the round trip", () => {
-    const wire = zoned.withCalendar("hebrew").toJSON();
-
-    expect(wire).toBe("2023-01-15T13:45:30+08:00[Asia/Manila][u-ca=hebrew]");
-
-    const revived = zZonedDateTime.parse(wire);
-    expect(revived.calendarId).toBe("hebrew");
-    expect(revived.timeZoneId).toBe("Asia/Manila");
-  });
-
-  test("the offset disambiguates a DST fall-back instant", () => {
-    const ambiguous = Temporal.ZonedDateTime.from(
-      "2023-11-05T01:30:00-05:00[America/New_York]",
-    );
-    const revived = zZonedDateTime.parse(ambiguous.toJSON());
-
-    expect(revived.epochNanoseconds).toBe(ambiguous.epochNanoseconds);
-  });
-});
-
-/**
- * A non-ISO calendar makes `toJSON()` append a `[u-ca=…]` annotation, and makes
- * `PlainYearMonth` / `PlainMonthDay` serialize as a full reference date instead
- * of `YYYY-MM` / `MM-DD`. The validators have always parsed those strings, since
- * they defer to `Temporal.X.from()`; the published patterns did not, so the
- * advertised contract was narrower than what the server emits. Anything
- * enforcing it — a generated client, an API gateway, ajv over the OpenAPI
- * document — would have rejected values that work end to end.
- */
-describe("non-ISO calendars round-trip through the published contract", () => {
-  // PlainYearMonth and PlainMonthDay have no `withCalendar`, so each value is
-  // derived from a PlainDate that already carries the calendar.
-  const hebrewDate = zoned.toPlainDate().withCalendar("hebrew");
-  const withHebrew: [string, z.ZodType, string, { toJSON: () => string }][] = [
-    ["PlainDate", zPlainDate, PLAIN_DATE_PATTERN, hebrewDate],
-    [
-      "PlainDateTime",
-      zPlainDateTime,
-      PLAIN_DATE_TIME_PATTERN,
-      zoned.toPlainDateTime().withCalendar("hebrew"),
-    ],
-    [
-      "PlainYearMonth",
-      zPlainYearMonth,
-      PLAIN_YEAR_MONTH_PATTERN,
-      hebrewDate.toPlainYearMonth(),
-    ],
-    [
-      "PlainMonthDay",
-      zPlainMonthDay,
-      PLAIN_MONTH_DAY_PATTERN,
-      hebrewDate.toPlainMonthDay(),
-    ],
-    [
-      "ZonedDateTime",
-      zZonedDateTime,
-      ZONED_DATE_TIME_PATTERN,
-      zoned.withCalendar("hebrew"),
-    ],
-  ];
-
-  for (const [name, schema, pattern, value] of withHebrew) {
-    test(`${name} emits, advertises and revives a hebrew-calendar string`, () => {
-      const wire = value.toJSON();
-      expect(wire).toContain("[u-ca=hebrew]");
-
-      // The advertised pattern accepts what the server emits...
-      expect(new RegExp(pattern, "u").test(wire)).toBe(true);
-
-      // ...and the client revives it losslessly.
-      const revived = schema.parse(wire) as {
-        toJSON: () => string;
-        calendarId: string;
-      };
-      expect(revived.calendarId).toBe("hebrew");
-      expect(revived.toJSON()).toBe(wire);
-    });
-  }
-
-  test("PlainYearMonth and PlainMonthDay still reject a bare calendar date", () => {
-    // Their non-ISO form is a full date, but only with the annotation present —
-    // a plain `2023-01-15` must not pass as either type.
-    expect(new RegExp(PLAIN_YEAR_MONTH_PATTERN, "u").test("2023-01-15")).toBe(
-      false,
-    );
-    expect(new RegExp(PLAIN_MONTH_DAY_PATTERN, "u").test("2023-01-15")).toBe(
-      false,
-    );
-  });
-
-  test("PlainDate accepts an extended (BCE) year", () => {
-    const wire = Temporal.PlainDate.from("-000753-04-21").toJSON();
-
-    expect(new RegExp(PLAIN_DATE_PATTERN, "u").test(wire)).toBe(true);
-    expect(zPlainDate.parse(wire).year).toBe(-753);
-  });
-
-  test("ZonedDateTime no longer lets its time zone group swallow the rest", () => {
-    // The old pattern ended in `\[.+\]`, whose greedy `.+` spanned both bracket
-    // groups — matching the calendar suffix only by accident, and accepting
-    // malformed annotations along the way.
-    expect(
-      new RegExp(ZONED_DATE_TIME_PATTERN, "u").test(
-        "2023-01-15T13:45:30+08:00[not a time zone!][]",
-      ),
-    ).toBe(false);
-    expect(
-      new RegExp(ZONED_DATE_TIME_PATTERN, "u").test(
-        "2023-01-15T13:45:30+08:00[Asia/Manila][u-ca=]",
-      ),
-    ).toBe(false);
-  });
-
-  test("every calendar Temporal supports survives the round trip", () => {
-    for (const calendar of [
-      "hebrew",
-      "japanese",
-      "islamic-umalqura",
-      "chinese",
-      "indian",
-      "persian",
-      "buddhist",
-      "coptic",
-      "ethiopic",
-      "roc",
-      "gregory",
-    ]) {
-      const date = zoned.toPlainDate().withCalendar(calendar);
-      const wire = date.toJSON();
-
-      expect(new RegExp(PLAIN_DATE_PATTERN, "u").test(wire)).toBe(true);
-      expect(zPlainDate.parse(wire).calendarId).toBe(calendar);
-    }
   });
 });

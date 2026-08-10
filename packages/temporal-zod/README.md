@@ -69,49 +69,13 @@ import { zPlainDate, zInstant } from "temporal-zod/base";
 
 This is backwards-compatible with the pre-JSON Schema versions of `temporal-zod`.
 
-### With oRPC
+### The Temporal registry
 
-[oRPC](https://orpc.unnoq.com) generates its OpenAPI documents with its own
-`ZodToJsonSchemaConverter` (from `@orpc/zod/zod4`), which re-implements the
-Zod → JSON Schema conversion instead of calling `z.toJSONSchema()`. Because a
-Temporal validator is a `z.union([...])` under the hood, the converter would
-otherwise emit a messy `anyOf` and drop the `format`/`pattern` metadata.
-
-`temporal-zod` exports `temporalJsonSchemaInterceptor` to fix this. Pass it to the
-converter and every Temporal validator renders as the correct string schema:
-
-```typescript
-import { OpenAPIGenerator } from "@orpc/openapi";
-import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
-import { temporalJsonSchemaInterceptor } from "temporal-zod";
-
-const generator = new OpenAPIGenerator({
-  schemaConverters: [
-    new ZodToJsonSchemaConverter({
-      interceptors: [temporalJsonSchemaInterceptor],
-    }),
-  ],
-});
-```
-
-`temporal-zod` does not depend on `@orpc/*` at all — not even for types. The
-interceptor is typed structurally, so if you don't use oRPC you pay nothing and
-nothing needs to resolve.
-
-The interceptor is driven by a registry rather than by a per-type list, so all
-eight Temporal types are covered — `Instant`, `ZonedDateTime`, `PlainDate`,
-`PlainTime`, `PlainDateTime`, `PlainYearMonth`, `PlainMonthDay`, and `Duration`
-— in both the coercing and `*Instance` variants.
-
-It only rewrites schemas that `temporal-zod` itself created. Every validator is
-registered in `temporalRegistry`, a Zod registry scoped to this package, and the
-interceptor consults that rather than `z.globalRegistry`. Your own schemas are
-left entirely to oRPC — including ones you annotate the same way we do, such as
-`z.string().min(5).meta({ type: "string", format: "email" })`, which keeps the
-`minLength` oRPC derives from its checks.
-
-`temporalRegistry` is exported, so you can use it to recognize Temporal
-validators in your own schema walks:
+Every validator this package exports is registered in `temporalRegistry`, a Zod
+registry scoped to `temporal-zod`, mapped to the JSON Schema it converts to. Use
+it to recognize a Temporal validator inside your own schema walk — by identity,
+rather than by guessing from `z.globalRegistry` metadata, which cannot tell our
+schemas apart from your own:
 
 ```typescript
 import { temporalRegistry, zInstant } from "temporal-zod";
@@ -119,6 +83,9 @@ import { temporalRegistry, zInstant } from "temporal-zod";
 temporalRegistry.has(zInstant); // true
 temporalRegistry.get(zInstant); // { type: "string", format: "date-time", … }
 ```
+
+The metadata-free `temporal-zod/base` validators are not members, since they
+carry no JSON Schema.
 
 Values travel as the plain ISO strings `toJSON()` produces, and the validator on
 the receiving end revives them. The published `pattern` accepts everything
@@ -131,6 +98,13 @@ which is RFC 3339 full-date and cannot carry an annotation. A validator that
 asserts `format` will therefore reject a non-ISO `PlainDate` even though the
 `pattern` accepts it. The `format` is kept because it is correct and useful for
 the ISO case, which is the overwhelmingly common one.
+
+### With oRPC
+
+[oRPC](https://orpc.unnoq.com) builds its OpenAPI documents with its own
+`ZodToJsonSchemaConverter`, which ignores the `.meta()` metadata above. Install
+[`temporal-orpc`](https://www.npmjs.com/package/temporal-orpc) to fix that; it
+keeps the oRPC dependency out of `temporal-zod`.
 
 ### With tRPC
 

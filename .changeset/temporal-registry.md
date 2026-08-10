@@ -2,22 +2,15 @@
 "temporal-zod": minor
 ---
 
-Add oRPC support: `temporal-zod` now exports `temporalJsonSchemaInterceptor`,
-which you pass to oRPC's `ZodToJsonSchemaConverter` so Temporal validators render
-as correct string JSON Schemas (with `format`/`pattern`) instead of the `anyOf`
-oRPC would otherwise produce.
+Export `temporalRegistry`, a Zod registry scoped to this package that holds every
+validator `temporal-zod` creates along with its JSON Schema. Use it to recognize
+Temporal validators in your own schema walks by identity —
+`temporalRegistry.has(zInstant)` — instead of pattern matching on
+`z.globalRegistry` metadata, which cannot tell our schemas apart from yours. The
+metadata-free `temporal-zod/base` validators are not members.
 
-`temporal-zod` takes on no dependency on `@orpc/*` — not even a type-only one.
-The interceptor is typed structurally, so consumers who don't use oRPC pay
-nothing and nothing needs to resolve at typecheck time.
-
-Also export `temporalRegistry`, a Zod registry scoped to this package that holds
-every validator `temporal-zod` creates along with its JSON Schema. The
-interceptor consults it rather than `z.globalRegistry`, so it rewrites only our
-own types and leaves your schemas — including ones you annotate the same way,
-such as `z.string().min(5).meta({ type: "string", format: "email" })` — entirely
-to oRPC. Use it to recognize Temporal validators in your own schema walks:
-`temporalRegistry.has(zInstant)`.
+This is what the new [`temporal-orpc`](https://www.npmjs.com/package/temporal-orpc)
+package consults to fix Temporal types in oRPC-generated OpenAPI documents.
 
 Widen the exported `*_PATTERN` regexes to accept everything `toJSON()` can emit,
 which matters now that they are published as an OpenAPI contract. They previously

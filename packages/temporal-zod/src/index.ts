@@ -25,5 +25,4 @@
  * @see {@link https://github.com/macalinao/temporal-utils/tree/master/packages/temporal-zod | temporal-zod on GitHub}
  */
 export * from "./json-schemas.js";
-export * from "./orpc.js";
 export * from "./registry.js";
