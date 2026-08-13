@@ -1,6 +1,13 @@
 import type { z } from "zod";
 import type { ZodTemporal } from "./temporal-validator.js";
 import { Temporal } from "ponyfill-temporal";
+import {
+  DATE_PART,
+  OFFSET_PART,
+  OPTIONAL_CALENDAR_PART,
+  TIME_PART,
+  TIME_ZONE_PART,
+} from "./iso-pattern-parts.js";
 import { temporalValidators } from "./temporal-validator.js";
 
 export const ZonedDateTime: typeof Temporal.ZonedDateTime =
@@ -12,9 +19,14 @@ export const ZonedDateTime: typeof Temporal.ZonedDateTime =
  * Validates month (01–12), day (01–31), hours (00–23), minutes/seconds (00–59),
  * up to 9 fractional digits, a UTC offset (Z or ±HH:MM), and a required IANA timezone
  * annotation in brackets.
+ *
+ * The time zone annotation is matched as a single bracket group rather than
+ * `\[.+\]`, so it no longer swallows a following `[u-ca=…]` — which is accepted
+ * on its own, as `toJSON()` emits it under a non-ISO calendar.
  */
 export const ZONED_DATE_TIME_PATTERN =
-  "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d(:[0-5]\\d(\\.\\d{1,9})?)?(Z|[+-]([01]\\d|2[0-3]):[0-5]\\d)\\[.+\\]$";
+  // oxlint-disable-next-line typescript/no-unnecessary-type-assertion -- tsc isolatedDeclarations (TS9010) requires it
+  `^${DATE_PART}T${TIME_PART}${OFFSET_PART}${TIME_ZONE_PART}${OPTIONAL_CALENDAR_PART}$` as string;
 
 const validators = temporalValidators(ZonedDateTime);
 

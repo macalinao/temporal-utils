@@ -69,6 +69,43 @@ import { zPlainDate, zInstant } from "temporal-zod/base";
 
 This is backwards-compatible with the pre-JSON Schema versions of `temporal-zod`.
 
+### The Temporal registry
+
+Every validator this package exports is registered in `temporalRegistry`, a Zod
+registry scoped to `temporal-zod`, mapped to the JSON Schema it converts to. Use
+it to recognize a Temporal validator inside your own schema walk — by identity,
+rather than by guessing from `z.globalRegistry` metadata, which cannot tell our
+schemas apart from your own:
+
+```typescript
+import { temporalRegistry, zInstant } from "temporal-zod";
+
+temporalRegistry.has(zInstant); // true
+temporalRegistry.get(zInstant); // { type: "string", format: "date-time", … }
+```
+
+The metadata-free `temporal-zod/base` validators are not members, since they
+carry no JSON Schema.
+
+Values travel as the plain ISO strings `toJSON()` produces, and the validator on
+the receiving end revives them. The published `pattern` accepts everything
+`toJSON()` can emit, including the `[u-ca=…]` annotation added under a non-ISO
+calendar, the full reference-date form `PlainYearMonth` and `PlainMonthDay` take
+under such a calendar, and signed six-digit years.
+
+One boundary is worth knowing: `PlainDate` also advertises `format: "date"`,
+which is RFC 3339 full-date and cannot carry an annotation. A validator that
+asserts `format` will therefore reject a non-ISO `PlainDate` even though the
+`pattern` accepts it. The `format` is kept because it is correct and useful for
+the ISO case, which is the overwhelmingly common one.
+
+### With oRPC
+
+[oRPC](https://orpc.unnoq.com) builds its OpenAPI documents with its own
+`ZodToJsonSchemaConverter`, which ignores the `.meta()` metadata above. Install
+[`temporal-orpc`](https://www.npmjs.com/package/temporal-orpc) to fix that; it
+keeps the oRPC dependency out of `temporal-zod`.
+
 ### With tRPC
 
 If you are using [tRPC](https://trpc.io/), you likely use Zod to validate your inputs and outputs. However, when using it with [Tanstack Query](https://tanstack.com/query), since the Temporal types get mapped to an object, you should ensure that you are using the instance of the Temporal type rather than the one with type coercion. Otherwise, the query cache will not work as expected.

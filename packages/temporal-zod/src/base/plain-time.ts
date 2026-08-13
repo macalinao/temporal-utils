@@ -1,6 +1,7 @@
 import type { z } from "zod";
 import type { ZodTemporal } from "./temporal-validator.js";
 import { Temporal } from "ponyfill-temporal";
+import { TIME_PART } from "./iso-pattern-parts.js";
 import { temporalValidators } from "./temporal-validator.js";
 
 export const PlainTime: typeof Temporal.PlainTime = Temporal.PlainTime;
@@ -10,9 +11,11 @@ export const PlainTime: typeof Temporal.PlainTime = Temporal.PlainTime;
  * (e.g. `13:45:30` or `13:45:30.123456789`).
  * Validates hours (00–23), minutes (00–59), seconds (00–59), and up to 9 fractional digits.
  * Note: Unlike RFC 3339 "full-time", PlainTime has no timezone offset.
+ *
+ * `PlainTime` carries no calendar, so unlike the date-bearing types this takes
+ * no `[u-ca=…]` annotation.
  */
-export const PLAIN_TIME_PATTERN =
-  "^([01]\\d|2[0-3]):[0-5]\\d(:[0-5]\\d(\\.\\d{1,9})?)?$";
+export const PLAIN_TIME_PATTERN = `^${TIME_PART}$` as string;
 
 const validators = temporalValidators(PlainTime);
 
