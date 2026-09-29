@@ -92,4 +92,26 @@ describe("formatTemporal", () => {
     const result = formatTemporal(plainMonthDay, formatter);
     expect(result).toBe("May 15");
   });
+
+  test("should format a non-ISO Temporal.PlainYearMonth in its own calendar", () => {
+    const hebrewYearMonth = Temporal.PlainDate.from("2023-05-15")
+      .withCalendar("hebrew")
+      .toPlainYearMonth();
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "long",
+    });
+    const result = formatTemporal(hebrewYearMonth, formatter);
+    expect(result).toBe("Iyar 5783");
+  });
+
+  test("should format a leap-day Temporal.PlainMonthDay", () => {
+    const leapDay = Temporal.PlainMonthDay.from({ month: 2, day: 29 });
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      month: "long",
+      day: "numeric",
+    });
+    const result = formatTemporal(leapDay, formatter);
+    expect(result).toBe("February 29");
+  });
 });

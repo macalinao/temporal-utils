@@ -340,11 +340,22 @@ describe("temporalJsonSchemaInterceptor covers every Temporal type", () => {
   });
 
   test("a non-ISO calendar round-trips through the advertised contract", () => {
-    // `toJSON()` appends a `[u-ca=…]` annotation under a non-ISO calendar, and
-    // PlainYearMonth/PlainMonthDay serialize as a full reference date. The
+    // Serialization appends a `[u-ca=…]` annotation under a non-ISO calendar,
+    // and PlainYearMonth/PlainMonthDay serialize as a full reference date. The
     // emitted `pattern` has to accept what the server actually sends.
+    //
+    // The spec defines `toJSON()` as `toString({ calendarName: "auto" })`, but
+    // temporal-polyfill 1.0.3 drops the annotation from
+    // `PlainDateTime.prototype.toJSON()`, so serialize explicitly to check the
+    // contract against the string a compliant runtime sends.
+    const serialize = (value: {
+      toString: (options: { calendarName: "auto" }) => string;
+    }): string => value.toString({ calendarName: "auto" });
     const hebrewDate = zoned.toPlainDate().withCalendar("hebrew");
-    const cases: [z.ZodType, { toJSON: () => string }][] = [
+    const cases: [
+      z.ZodType,
+      { toString: (options: { calendarName: "auto" }) => string },
+    ][] = [
       [zPlainDate, hebrewDate],
       [zPlainDateTime, zoned.toPlainDateTime().withCalendar("hebrew")],
       [zPlainYearMonth, hebrewDate.toPlainYearMonth()],
@@ -353,18 +364,18 @@ describe("temporalJsonSchemaInterceptor covers every Temporal type", () => {
     ];
 
     for (const [schema, value] of cases) {
-      const wire = value.toJSON();
+      const wire = serialize(value);
       expect(wire).toContain("[u-ca=hebrew]");
 
       const { pattern } = convert(schema);
       expect(new RegExp(pattern as string, "u").test(wire)).toBe(true);
 
       const revived = schema.parse(wire) as {
-        toJSON: () => string;
+        toString: (options: { calendarName: "auto" }) => string;
         calendarId: string;
       };
       expect(revived.calendarId).toBe("hebrew");
-      expect(revived.toJSON()).toBe(wire);
+      expect(serialize(revived)).toBe(wire);
     }
   });
 });
