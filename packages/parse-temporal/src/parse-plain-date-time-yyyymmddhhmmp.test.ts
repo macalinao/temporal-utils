@@ -29,8 +29,34 @@ describe("parsePlainDateTimeYYYYMMDDHHMMp", () => {
         year: 2024,
         month: 2,
         day: 29,
+        hour: 12,
+        minute: 50,
+        second: 0,
+      }),
+    );
+  });
+
+  test("should parse midnight as hour 0", () => {
+    expect(parsePlainDateTimeYYYYMMDDHHMMp("2024/12/30 12:05 AM")).toEqual(
+      Temporal.PlainDateTime.from({
+        year: 2024,
+        month: 12,
+        day: 30,
         hour: 0,
-        minute: 0,
+        minute: 5,
+        second: 0,
+      }),
+    );
+  });
+
+  test("should parse a morning time", () => {
+    expect(parsePlainDateTimeYYYYMMDDHHMMp("2024/12/30 09:05 AM")).toEqual(
+      Temporal.PlainDateTime.from({
+        year: 2024,
+        month: 12,
+        day: 30,
+        hour: 9,
+        minute: 5,
         second: 0,
       }),
     );

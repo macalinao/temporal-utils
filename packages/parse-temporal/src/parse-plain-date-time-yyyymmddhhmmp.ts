@@ -22,7 +22,7 @@ export const parsePlainDateTimeYYYYMMDDHHMMp = (
   return date.toPlainDateTime(
     Temporal.PlainTime.from(
       {
-        hour: hours + (amOrPm === "PM" && hours < 12 ? 12 : 0),
+        hour: (hours % 12) + (amOrPm === "PM" ? 12 : 0),
         minute: minutes,
       },
       { overflow: "reject" },
