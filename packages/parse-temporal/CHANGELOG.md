@@ -1,5 +1,11 @@
 # parse-temporal
 
+## 0.6.1
+
+### Patch Changes
+
+- 57860cb: Fix `parsePlainDateTimeYYYYMMDDHHMMp` parsing `12:05 AM` as noon instead of midnight.
+
 ## 0.6.0
 
 ### Minor Changes
