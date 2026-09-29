@@ -1,6 +1,6 @@
 {
   "name": "parse-temporal",
-  "version": "0.6.1",
+  "version": "0.6.0",
   "description": "Parse Temporal objects from strings.",
   "keywords": [
     "parse",
